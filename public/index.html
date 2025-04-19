@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Gallery</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Add lightGallery CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <header class="main-header">
+      <div class="container">
+        <h1><i class="fas fa-camera-retro"></i> Event Gallery</h1>
+        <div class="control-buttons">
+          <button id="refreshBtn" class="refresh-btn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+          <button id="adminToggle" class="admin-btn">
+            <i class="fas fa-lock"></i> Admin
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-panel" id="adminPanel">
+      <div class="container">
+        <h2><i class="fas fa-tools"></i> Admin Controls</h2>
+        <div class="admin-actions">
+          <div class="form-group">
+            <input type="text" id="newEventName" placeholder="Event Name" />
+            <input type="password" id="adminKey" placeholder="Admin Key" />
+            <input type="file" id="coverPhoto" accept="image/*" />
+            <button id="createEventBtn" class="btn-primary">
+              <i class="fas fa-plus"></i> Create Event
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="container">
+      <div class="events-grid" id="eventsGrid">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading events...</p>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal" id="eventModal">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Create New Event</h2>
+        <div class="form-group">
+          <input
+            type="text"
+            id="eventNameInput"
+            placeholder="Event Name"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="password"
+            id="adminKeyInput"
+            placeholder="Admin Key"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input type="file" id="coverPhotoInput" accept="image/*" />
+        </div>
+        <button id="confirmCreate" class="btn-primary">Create Event</button>
+      </div>
+    </div>
+
+    <!-- LightGallery JS Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="/js/home.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add refresh button functionality
+        const refreshBtn = document.getElementById("refreshBtn");
+        if (refreshBtn) {
+          refreshBtn.addEventListener("click", function () {
+            loadEvents(true); // Force reload without cache
+          });
+        }
+
+        // Set up automatic refresh interval
+        setInterval(() => {
+          loadEvents(true); // Always bypass cache for real-time sync
+        }, 30000); // Check for updates every 30 seconds
+      });
+
+      function loadEvents(bypassCache = false) {
+        const eventsGrid = document.getElementById("eventsGrid");
+        eventsGrid.innerHTML = `
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading events...</p>
+          </div>
+        `;
+
+        // Add cache buster if needed
+        const cacheBuster = bypassCache ? `?_t=${new Date().getTime()}` : "";
+
+        fetch(`/api/events${cacheBuster}`)
+          .then((response) => response.json())
+          .then((events) => {
+            if (events.length === 0) {
+              eventsGrid.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-calendar-xmark"></i>
+                  <h3>No events found</h3>
+                  <p>Create your first event using the admin panel</p>
+                </div>
+              `;
+              return;
+            }
+
+            eventsGrid.innerHTML = events
+              .map(
+                (event) => `
+                <div class="event-card">
+                  <a href="/events/${event.id}" class="event-link">
+                    ${
+                      event.coverId
+                        ? `<img src="/api/imageproxy/${event.coverId}?size=w400" alt="${event.name}" class="event-cover">`
+                        : `<div class="event-icon">${
+                            event.folderIcon || ""
+                          }</div>`
+                    }
+                    <div class="event-info">
+                      <h3>${event.name}</h3>
+                      <p>${new Date(event.createdTime).toLocaleDateString()}</p>
+                    </div>
+                  </a>
+                </div>
+              `
+              )
+              .join("");
+          })
+          .catch((error) => {
+            console.error("Error loading events:", error);
+            eventsGrid.innerHTML = `
+              <div class="error-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Failed to load events</h3>
+                <p>Please try again later</p>
+              </div>
+            `;
+          });
+      }
+
+      function showNotification(message, type = "success") {
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.classList.add("show");
+        }, 100);
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>

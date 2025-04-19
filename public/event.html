@@ -1,0 +1,258 @@
+<!-- event.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Photos</title>
+
+    <!-- CSS Dependencies -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="event-header-bar">
+        <h1 id="event-name">Loading Event...</h1>
+        <a href="/" class="btn-primary home-link">Home</a>
+      </div>
+
+      <div class="controls">
+        <div class="toggle-view">
+          <button id="select-all">Select All</button>
+          <button id="deselect-all">Deselect All</button>
+        </div>
+        <div class="action-buttons">
+          <button id="download-selected" class="download-btn">
+            Download Selected
+          </button>
+          <button id="download-all" class="download-btn">Download All</button>
+        </div>
+      </div>
+
+      <div id="gallery" class="gallery"></div>
+      <div id="pagination"></div>
+      <div id="loading" class="loading">Loading images...</div>
+    </div>
+
+    <!-- JavaScript Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+
+    <script>
+      // Get event ID from URL
+      const eventId = window.location.pathname.split("/").pop();
+      let photos = [];
+      let galleryInstance = null;
+      let currentPage = 1;
+      const pageSize = 20;
+
+      // DOM elements
+      const galleryEl = document.getElementById("gallery");
+      const loadingEl = document.getElementById("loading");
+      const eventNameEl = document.getElementById("event-name");
+      const selectAllBtn = document.getElementById("select-all");
+      const deselectAllBtn = document.getElementById("deselect-all");
+      const downloadSelectedBtn = document.getElementById("download-selected");
+      const downloadAllBtn = document.getElementById("download-all");
+
+      // Load event info
+      async function loadEventInfo() {
+        try {
+          const res = await fetch("/api/events");
+          const events = await res.json();
+          const event = events.find((e) => e.id === eventId);
+
+          if (event) {
+            eventNameEl.textContent = event.name;
+            document.title = `Photos - ${event.name}`;
+          }
+        } catch (error) {
+          console.error("Error loading event info:", error);
+        }
+      }
+
+      // Load photos
+      async function loadPhotos() {
+        loadingEl.style.display = "block";
+        galleryEl.innerHTML = "";
+        document.getElementById("pagination").innerHTML = "";
+
+        try {
+          const res = await fetch(`/api/events/${eventId}/photos`);
+          photos = await res.json();
+
+          if (photos.length === 0) {
+            loadingEl.textContent = "No photos found in this gallery.";
+            return;
+          }
+
+          renderGallery();
+          renderPagination();
+          initLightGallery();
+          loadingEl.style.display = "none";
+        } catch (error) {
+          console.error("Error loading photos:", error);
+          loadingEl.textContent =
+            "Error loading photos. Please try again later.";
+        }
+      }
+
+      // Render gallery items
+      function renderGallery() {
+        galleryEl.innerHTML = "";
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pagePhotos = photos.slice(start, end);
+
+        pagePhotos.forEach((photo, index) => {
+          const item = document.createElement("div");
+          item.className = "gallery-item";
+          item.dataset.index = index;
+
+          // Create the checkbox container
+          const checkboxContainer = document.createElement("div");
+          checkboxContainer.className = "checkbox-container";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "photo-checkbox";
+          checkbox.dataset.id = photo.id;
+          checkboxContainer.appendChild(checkbox);
+
+          // Use backend proxy for all images
+          const img = document.createElement("img");
+          img.src = `/api/imageproxy/${photo.id}?size=w400`;
+          img.alt = photo.name;
+          img.loading = "lazy";
+          img.onerror = function () {
+            this.onerror = null;
+            this.src = "";
+            this.alt = photo.name;
+            this.classList.add("img-fallback");
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = photo.name;
+            nameSpan.className = "img-fallback-label";
+            this.parentNode.appendChild(nameSpan);
+          };
+
+          item.appendChild(checkboxContainer);
+          item.appendChild(img);
+
+          if (photo.folderPath) {
+            const folderLabel = document.createElement("div");
+            folderLabel.className = "folder-label";
+            folderLabel.textContent = photo.folderPath;
+            item.appendChild(folderLabel);
+          }
+
+          galleryEl.appendChild(item);
+        });
+      }
+
+      // Render pagination controls
+      function renderPagination() {
+        const paginationEl = document.getElementById("pagination");
+        paginationEl.innerHTML = "";
+        const totalPages = Math.ceil(photos.length / pageSize);
+
+        if (totalPages <= 1) return;
+
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement("button");
+          btn.textContent = i;
+          btn.className = "btn-primary" + (i === currentPage ? " active" : "");
+          btn.style.margin = "0 2px";
+          btn.onclick = () => {
+            currentPage = i;
+            renderGallery();
+            renderPagination();
+            initLightGallery();
+          };
+          paginationEl.appendChild(btn);
+        }
+      }
+
+      // Also update the lightGallery initialization with improved URLs
+      function initLightGallery() {
+        if (galleryInstance) {
+          galleryInstance.destroy();
+        }
+        galleryInstance = lightGallery(galleryEl, {
+          dynamic: true,
+          dynamicEl: photos.map((photo) => ({
+            src: `/api/imageproxy/${photo.id}?size=w1200`,
+            thumb: `/api/imageproxy/${photo.id}?size=w200`,
+            subHtml: `<h4>${photo.name}</h4>${
+              photo.folderPath ? `<p>Folder: ${photo.folderPath}</p>` : ""
+            }`,
+            download: photo.downloadUrl,
+          })),
+          plugins: [lgZoom, lgThumbnail],
+          speed: 500,
+          download: true,
+          counter: true,
+          enableDrag: true,
+          enableTouch: true,
+        });
+        document.querySelectorAll(".gallery-item").forEach((item) => {
+          item.addEventListener("click", function (e) {
+            if (e.target.type === "checkbox") return;
+            const index = parseInt(this.dataset.index);
+            galleryInstance.openGallery(index);
+          });
+        });
+      }
+
+      // Download selected photos
+      function downloadSelected() {
+        const checkboxes = document.querySelectorAll(".photo-checkbox:checked");
+        const selectedIds = Array.from(checkboxes).map((cb) => cb.dataset.id);
+
+        if (selectedIds.length === 0) {
+          alert("Please select at least one photo to download.");
+          return;
+        }
+
+        const downloadUrl = `/api/events/${eventId}/download?ids=${selectedIds.join(
+          ","
+        )}`;
+        window.location.href = downloadUrl;
+      }
+
+      // Download all photos
+      function downloadAll() {
+        const downloadUrl = `/api/events/${eventId}/download`;
+        window.location.href = downloadUrl;
+      }
+
+      // Toggle all checkboxes
+      function toggleCheckboxes(checked) {
+        document.querySelectorAll(".photo-checkbox").forEach((cb) => {
+          cb.checked = checked;
+        });
+      }
+
+      // Event listeners
+      selectAllBtn.addEventListener("click", () => toggleCheckboxes(true));
+      deselectAllBtn.addEventListener("click", () => toggleCheckboxes(false));
+      downloadSelectedBtn.addEventListener("click", downloadSelected);
+      downloadAllBtn.addEventListener("click", downloadAll);
+
+      // Initialize
+      loadEventInfo();
+      loadPhotos();
+    </script>
+  </body>
+</html>
