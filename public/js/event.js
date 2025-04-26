@@ -42,10 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      photoGrid.innerHTML = photos
-        .map(
-          (photo) => `
-        <div class="photo-card">
+      // Batch DOM update: build HTML string first
+      let html = "";
+      photos.forEach((photo, idx) => {
+        html += `
+        <div class="photo-card" data-photo-idx="${idx}">
           <img src="/api/imageproxy/${photo.id}?size=w400" 
                alt="${photo.name}" 
                class="photo-img"
@@ -64,16 +65,17 @@ document.addEventListener("DOMContentLoaded", () => {
             </a>
           </div>
         </div>
-      `
-        )
-        .join("");
+        `;
+      });
+      photoGrid.innerHTML = html;
 
-      // Add click event to photos
-      document.querySelectorAll(".photo-img").forEach((img) => {
+      // Add click event to photos (delegated for performance, using correct photo)
+      photoGrid.querySelectorAll(".photo-img").forEach((img, idx) => {
         img.addEventListener("click", () => {
-          modalImage.src = img.dataset.full;
-          downloadFull.href = img.dataset.download;
-          downloadFull.download = img.dataset.name;
+          const photo = photos[idx];
+          modalImage.src = `/api/imageproxy/${photo.id}?size=w1200`;
+          downloadFull.href = photo.downloadUrl || photo.webContentLink;
+          downloadFull.download = photo.name;
           photoModal.style.display = "flex";
         });
       });

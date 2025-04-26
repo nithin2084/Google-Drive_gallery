@@ -6,19 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Photos</title>
 
-    <!-- CSS Dependencies -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
-    />
+    <!-- LightGallery CSS (restored) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css" />
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
@@ -46,7 +37,7 @@
       <div id="loading" class="loading">Loading images...</div>
     </div>
 
-    <!-- JavaScript Dependencies -->
+    <!-- LightGallery JS (restored) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
@@ -110,7 +101,7 @@
         }
       }
 
-      // Render gallery items
+      // Render gallery items (LightGallery version)
       function renderGallery() {
         galleryEl.innerHTML = "";
         const start = (currentPage - 1) * pageSize;
@@ -118,11 +109,19 @@
         const pagePhotos = photos.slice(start, end);
 
         pagePhotos.forEach((photo, index) => {
-          const item = document.createElement("div");
-          item.className = "gallery-item";
-          item.dataset.index = index;
+          const a = document.createElement("a");
+          a.href = `/api/imageproxy/${photo.id}?size=w1200`;
+          a.setAttribute("data-lg-size", `${photo.width || 1200}-${photo.height || 800}`);
+          a.setAttribute("target", "_blank");
+          a.setAttribute("data-index", start + index);
+          a.className = "gallery-item";
 
-          // Create the checkbox container
+          const img = document.createElement("img");
+          img.src = `/api/imageproxy/${photo.id}?size=w400`;
+          img.alt = photo.name;
+          img.loading = "lazy";
+          a.appendChild(img);
+
           const checkboxContainer = document.createElement("div");
           checkboxContainer.className = "checkbox-container";
           const checkbox = document.createElement("input");
@@ -130,34 +129,16 @@
           checkbox.className = "photo-checkbox";
           checkbox.dataset.id = photo.id;
           checkboxContainer.appendChild(checkbox);
-
-          // Use backend proxy for all images
-          const img = document.createElement("img");
-          img.src = `/api/imageproxy/${photo.id}?size=w400`;
-          img.alt = photo.name;
-          img.loading = "lazy";
-          img.onerror = function () {
-            this.onerror = null;
-            this.src = "";
-            this.alt = photo.name;
-            this.classList.add("img-fallback");
-            const nameSpan = document.createElement("span");
-            nameSpan.textContent = photo.name;
-            nameSpan.className = "img-fallback-label";
-            this.parentNode.appendChild(nameSpan);
-          };
-
-          item.appendChild(checkboxContainer);
-          item.appendChild(img);
+          a.appendChild(checkboxContainer);
 
           if (photo.folderPath) {
             const folderLabel = document.createElement("div");
             folderLabel.className = "folder-label";
             folderLabel.textContent = photo.folderPath;
-            item.appendChild(folderLabel);
+            a.appendChild(folderLabel);
           }
 
-          galleryEl.appendChild(item);
+          galleryEl.appendChild(a);
         });
       }
 
@@ -184,34 +165,19 @@
         }
       }
 
-      // Also update the lightGallery initialization with improved URLs
+      // LightGallery initialization (fixed for static DOM mode)
       function initLightGallery() {
         if (galleryInstance) {
           galleryInstance.destroy();
         }
         galleryInstance = lightGallery(galleryEl, {
-          dynamic: true,
-          dynamicEl: photos.map((photo) => ({
-            src: `/api/imageproxy/${photo.id}?size=w1200`,
-            thumb: `/api/imageproxy/${photo.id}?size=w200`,
-            subHtml: `<h4>${photo.name}</h4>${
-              photo.folderPath ? `<p>Folder: ${photo.folderPath}</p>` : ""
-            }`,
-            download: photo.downloadUrl,
-          })),
+          selector: 'a.gallery-item', // Use static DOM mode
           plugins: [lgZoom, lgThumbnail],
           speed: 500,
           download: true,
           counter: true,
           enableDrag: true,
           enableTouch: true,
-        });
-        document.querySelectorAll(".gallery-item").forEach((item) => {
-          item.addEventListener("click", function (e) {
-            if (e.target.type === "checkbox") return;
-            const index = parseInt(this.dataset.index);
-            galleryInstance.openGallery(index);
-          });
         });
       }
 

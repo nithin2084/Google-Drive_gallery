@@ -1,3 +1,37 @@
+(function sitePasswordSplash() {
+  const SITE_PASSWORD = "0000"; // Change this to your desired password
+  const STORAGE_KEY = "site_access_granted";
+  if (localStorage.getItem(STORAGE_KEY) === "true") return;
+  const splash = document.createElement("div");
+  splash.className = "splash-overlay";
+  splash.innerHTML = `
+    <div class="splash-box">
+      <h2>Enter Access Code</h2>
+      <div class="splash-error" id="splashError"></div>
+      <input type="password" id="splashInput" placeholder="Access code" autofocus autocomplete="off" />
+      <button id="splashBtn">Enter</button>
+    </div>
+  `;
+  document.body.appendChild(splash);
+  const input = splash.querySelector("#splashInput");
+  const btn = splash.querySelector("#splashBtn");
+  const error = splash.querySelector("#splashError");
+  function tryAccess() {
+    if (input.value === SITE_PASSWORD) {
+      localStorage.setItem(STORAGE_KEY, "true");
+      splash.remove();
+    } else {
+      error.textContent = "Incorrect code. Please try again.";
+      input.value = "";
+      input.focus();
+    }
+  }
+  btn.onclick = tryAccess;
+  input.onkeydown = (e) => {
+    if (e.key === "Enter") tryAccess();
+  };
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
   // Global functionalities
   setupGlobalNav();
