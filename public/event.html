@@ -7,9 +7,18 @@
     <title>Event Photos</title>
 
     <!-- LightGallery CSS (restored) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
+    />
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
@@ -108,7 +117,10 @@
         pagePhotos.forEach((photo, index) => {
           const a = document.createElement("a");
           a.href = `/api/imageproxy/${photo.id}?size=w1200`;
-          a.setAttribute("data-lg-size", `${photo.width || 1200}-${photo.height || 800}`);
+          a.setAttribute(
+            "data-lg-size",
+            `${photo.width || 1200}-${photo.height || 800}`
+          );
           a.setAttribute("target", "_blank");
           a.setAttribute("data-index", start + index);
           a.className = "gallery-item";
@@ -138,7 +150,7 @@
           // Remove any previous click listeners by cloning
           const aClone = a.cloneNode(true);
           if (selectMode) {
-            aClone.addEventListener("click", function(e) {
+            aClone.addEventListener("click", function (e) {
               e.preventDefault();
               const cb = aClone.querySelector(".photo-checkbox");
               cb.checked = !cb.checked;
@@ -179,7 +191,7 @@
         }
         if (!selectMode) {
           galleryInstance = lightGallery(galleryEl, {
-            selector: 'a.gallery-item',
+            selector: "a.gallery-item",
             plugins: [lgZoom, lgThumbnail],
             speed: 500,
             download: true,
@@ -213,10 +225,12 @@
       }
 
       // Event listeners
-      selectMoreBtn.addEventListener("click", function() {
+      selectMoreBtn.addEventListener("click", function () {
         selectMode = !selectMode;
         selectMoreBtn.classList.toggle("active", selectMode);
-        selectMoreBtn.textContent = selectMode ? "Done selecting" : "Select more";
+        selectMoreBtn.textContent = selectMode
+          ? "Done selecting"
+          : "Select more";
         renderGallery();
         renderPagination();
         initLightGallery();

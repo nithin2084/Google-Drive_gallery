@@ -284,7 +284,8 @@ h2 {
   border-radius: 6px;
   border: 1.5px solid #ddd;
 }
-.gallery-item a, .gallery-item {
+.gallery-item a,
+.gallery-item {
   /* Prevent anchor from blocking checkbox clicks */
   position: relative;
 }
@@ -430,14 +431,14 @@ h2 {
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.2rem;
 }
 .splash-box {
   background: #222b;
   padding: 2.5rem 2rem 2rem 2rem;
   border-radius: 16px;
-  box-shadow: 0 4px 32px rgba(67,97,238,0.18);
+  box-shadow: 0 4px 32px rgba(67, 97, 238, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
