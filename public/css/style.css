@@ -165,7 +165,7 @@ h2 {
 .refresh-btn:before,
 .admin-btn:before,
 .download-btn:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -229,22 +229,18 @@ h2 {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 20px rgba(67, 97, 238, 0.07),
+  box-shadow: 0 8px 20px rgba(67, 97, 238, 0.07),
     0 2px 8px rgba(67, 97, 238, 0.04);
   transform-origin: center;
-  transition: 
-    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease, border-color 0.3s ease;
   display: flex;
   flex-direction: column;
   min-height: 320px;
 }
 .event-card:hover {
   border-color: rgba(67, 97, 238, 0.3);
-  box-shadow: 
-    0 12px 28px rgba(67, 97, 238, 0.12),
+  box-shadow: 0 12px 28px rgba(67, 97, 238, 0.12),
     0 4px 12px rgba(67, 97, 238, 0.08);
   transform: translateY(-6px) scale(1.02);
 }
@@ -336,7 +332,7 @@ h2 {
   transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .gallery-item::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: rgba(67, 97, 238, 0.1);
@@ -354,7 +350,7 @@ h2 {
 }
 .photo-card.selected::after,
 .gallery-item.selected::after {
-  content: '✓';
+  content: "✓";
   position: absolute;
   top: 10px;
   right: 10px;
@@ -375,8 +371,7 @@ h2 {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: 
-    transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1),
+  transition: transform 0.5s cubic-bezier(0.165, 0.84, 0.44, 1),
     filter 0.3s ease;
 }
 .gallery-item:hover img {
@@ -386,7 +381,10 @@ h2 {
 .photo-card .img-overlay,
 .gallery-item .img-overlay {
   position: absolute;
-  left: 0; right: 0; bottom: 0; top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.85) 0%,
@@ -438,10 +436,8 @@ h2 {
   border-radius: 8px;
   transform: translateY(10px);
   opacity: 0;
-  transition: 
-    transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
-    opacity 0.3s ease,
-    background-color 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 0.3s ease, background-color 0.2s ease;
 }
 .gallery-item:hover .img-actions a {
   transform: translateY(0);
@@ -454,9 +450,15 @@ h2 {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px) scale(1.05) !important;
 }
-.img-actions a:nth-child(1) { transition-delay: 0.1s; }
-.img-actions a:nth-child(2) { transition-delay: 0.15s; }
-.img-actions a:nth-child(3) { transition-delay: 0.2s; }
+.img-actions a:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.img-actions a:nth-child(2) {
+  transition-delay: 0.15s;
+}
+.img-actions a:nth-child(3) {
+  transition-delay: 0.2s;
+}
 @media (max-width: 1024px) {
   .photo-grid,
   .gallery {
@@ -493,7 +495,7 @@ h2 {
     top: 60px;
     background: white;
     padding: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 90;
   }
   .action-buttons {
@@ -557,11 +559,11 @@ h2 {
   main {
     min-height: calc(100vh - 150px);
   }
-  
+
   .footer {
     padding: 1rem 0;
   }
-  
+
   .footer .container {
     justify-content: center;
     text-align: center;
@@ -746,9 +748,7 @@ h2 {
   background: white;
   color: var(--dark);
   border-radius: var(--radius);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
   z-index: 2000;
   opacity: 0;
   transform: translateX(30px);
@@ -1010,7 +1010,7 @@ h2 {
 }
 
 .breadcrumb-item:not(:last-child)::after {
-  content: '/';
+  content: "/";
   position: absolute;
   right: 8px;
   color: #ccc;
@@ -1104,11 +1104,11 @@ h2 {
   main {
     min-height: calc(100vh - 150px);
   }
-  
+
   .footer {
     padding: 1rem 0;
   }
-  
+
   .footer .container {
     justify-content: center;
     text-align: center;

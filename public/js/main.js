@@ -28,11 +28,11 @@
   const error = splash.querySelector("#splashError");
   const togglePin = splash.querySelector("#togglePin");
   // Show/hide PIN logic
-  togglePin.onclick = function() {
+  togglePin.onclick = function () {
     input.type = input.type === "password" ? "text" : "password";
     togglePin.textContent = input.type === "password" ? "👁️" : "🙈";
   };
-  togglePin.onkeydown = function(e) {
+  togglePin.onkeydown = function (e) {
     if (e.key === "Enter" || e.key === " ") togglePin.click();
   };
   function tryAccess() {
@@ -185,27 +185,33 @@ document.addEventListener("DOMContentLoaded", function () {
       notification.className = `notification ${type}`;
       notification.innerHTML = `
         <div class="notification-icon">
-          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          <i class="fas fa-${
+            type === "success"
+              ? "check-circle"
+              : type === "error"
+              ? "exclamation-circle"
+              : "info-circle"
+          }"></i>
         </div>
         <div class="notification-message">${message}</div>
       `;
-      
+
       document.body.appendChild(notification);
-      
+
       requestAnimationFrame(() => {
-        notification.classList.add('show');
+        notification.classList.add("show");
       });
-    
+
       const hideNotification = () => {
-        notification.classList.remove('show');
-        notification.addEventListener('transitionend', () => {
+        notification.classList.remove("show");
+        notification.addEventListener("transitionend", () => {
           notification.remove();
         });
       };
-    
+
       // Add click to dismiss
-      notification.addEventListener('click', hideNotification);
-    
+      notification.addEventListener("click", hideNotification);
+
       setTimeout(hideNotification, 3000);
     }
 
@@ -223,20 +229,20 @@ document.addEventListener("DOMContentLoaded", function () {
     // Scroll-to-top functionality
     function setupScrollToTop() {
       // Scroll-to-top functionality globally
-      const scrollToTopBtn = document.getElementById('scrollToTop');
+      const scrollToTopBtn = document.getElementById("scrollToTop");
       if (scrollToTopBtn) {
-        window.addEventListener('scroll', () => {
+        window.addEventListener("scroll", () => {
           if (window.scrollY > 300) {
-            scrollToTopBtn.classList.add('show');
+            scrollToTopBtn.classList.add("show");
           } else {
-            scrollToTopBtn.classList.remove('show');
+            scrollToTopBtn.classList.remove("show");
           }
         });
-      
-        scrollToTopBtn.addEventListener('click', () => {
+
+        scrollToTopBtn.addEventListener("click", () => {
           window.scrollTo({
             top: 0,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
         });
       }
@@ -322,26 +328,32 @@ function showNotification(message, type = "success") {
   notification.className = `notification ${type}`;
   notification.innerHTML = `
     <div class="notification-icon">
-      <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+      <i class="fas fa-${
+        type === "success"
+          ? "check-circle"
+          : type === "error"
+          ? "exclamation-circle"
+          : "info-circle"
+      }"></i>
     </div>
     <div class="notification-message">${message}</div>
   `;
-  
+
   document.body.appendChild(notification);
-  
+
   requestAnimationFrame(() => {
-    notification.classList.add('show');
+    notification.classList.add("show");
   });
 
   const hideNotification = () => {
-    notification.classList.remove('show');
-    notification.addEventListener('transitionend', () => {
+    notification.classList.remove("show");
+    notification.addEventListener("transitionend", () => {
       notification.remove();
     });
   };
 
   // Add click to dismiss
-  notification.addEventListener('click', hideNotification);
+  notification.addEventListener("click", hideNotification);
 
   setTimeout(hideNotification, 3000);
 }
@@ -358,20 +370,20 @@ function setupGlobalNav() {
 
 function setupScrollToTop() {
   // Scroll-to-top functionality globally
-  const scrollToTopBtn = document.getElementById('scrollToTop');
+  const scrollToTopBtn = document.getElementById("scrollToTop");
   if (scrollToTopBtn) {
-    window.addEventListener('scroll', function () {
+    window.addEventListener("scroll", function () {
       if (window.scrollY > 300) {
-        scrollToTopBtn.classList.add('show');
+        scrollToTopBtn.classList.add("show");
       } else {
-        scrollToTopBtn.classList.remove('show');
+        scrollToTopBtn.classList.remove("show");
       }
     });
-  
-    scrollToTopBtn.addEventListener('click', function () {
+
+    scrollToTopBtn.addEventListener("click", function () {
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     });
   }

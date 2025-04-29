@@ -246,13 +246,13 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="img-title">${photo.name}</span>
           </div>
         `;
-        
+
         // Add click handler for selection
-        div.addEventListener('click', () => {
-          div.classList.toggle('selected');
+        div.addEventListener("click", () => {
+          div.classList.toggle("selected");
           const checkbox = div.querySelector('input[type="checkbox"]');
           if (checkbox) {
-            checkbox.checked = div.classList.contains('selected');
+            checkbox.checked = div.classList.contains("selected");
           }
         });
 
@@ -261,12 +261,12 @@ document.addEventListener("DOMContentLoaded", () => {
         checkbox.type = "checkbox";
         checkbox.className = "checkbox-container";
         checkbox.dataset.id = photo.id;
-        checkbox.addEventListener('change', (e) => {
-          div.classList.toggle('selected', e.target.checked);
+        checkbox.addEventListener("change", (e) => {
+          div.classList.toggle("selected", e.target.checked);
           e.stopPropagation();
         });
         div.appendChild(checkbox);
-        
+
         galleryEl.appendChild(div);
       });
 
@@ -389,12 +389,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const ids = Array.from(
       document.querySelectorAll(".gallery-item.selected")
     ).map((el) => el.dataset.id);
-    
+
     if (!ids.length) {
       showNotification("Select at least one image.", "error");
       return;
     }
-    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(",")}`;
+    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(
+      ","
+    )}`;
   });
 
   // Download all
