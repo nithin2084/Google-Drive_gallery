@@ -8,30 +8,47 @@
   splash.innerHTML = `
     <div class="splash-bg"></div>
     <div class="splash-fade"></div>
-    <div class="splash-box">
+    <div class="splash-box" role="dialog" aria-modal="true" aria-label="Access PIN Dialog">
       <div class="splash-logos">
         <img src="/img/logo1.png" alt="Collega Logo" />
         <img src="/img/F1-Logo.png" alt="Media Club Logo" />
       </div>
-      <h2>Enter Access PIN</h2>
-      <div class="splash-error" id="splashError"></div>
-      <input type="password" id="splashInput" placeholder="Access PIN" autofocus autocomplete="off" />
-      <button id="splashBtn">Enter</button>
+      <h2 id="splashTitle">Enter Access PIN</h2>
+      <div class="splash-error" id="splashError" role="alert"></div>
+      <div style="position:relative;width:100%;">
+        <input type="password" id="splashInput" placeholder="Access PIN" autofocus autocomplete="off" aria-labelledby="splashTitle" aria-required="true" />
+        <button class="toggle-pin" id="togglePin" aria-label="Show or hide PIN" tabindex="0" type="button">👁️</button>
+      </div>
+      <button id="splashBtn" aria-label="Submit PIN">Enter</button>
     </div>
   `;
   document.body.appendChild(splash);
   const input = splash.querySelector("#splashInput");
   const btn = splash.querySelector("#splashBtn");
   const error = splash.querySelector("#splashError");
+  const togglePin = splash.querySelector("#togglePin");
+  // Show/hide PIN logic
+  togglePin.onclick = function() {
+    input.type = input.type === "password" ? "text" : "password";
+    togglePin.textContent = input.type === "password" ? "👁️" : "🙈";
+  };
+  togglePin.onkeydown = function(e) {
+    if (e.key === "Enter" || e.key === " ") togglePin.click();
+  };
   function tryAccess() {
-    if (input.value === SITE_PIN) {
-      // localStorage.setItem(STORAGE_KEY, "true");
-      splash.remove();
-    } else {
-      error.textContent = "Incorrect PIN. Please try again.";
-      input.value = "";
-      input.focus();
-    }
+    btn.disabled = true;
+    btn.textContent = "Checking...";
+    setTimeout(() => {
+      if (input.value === SITE_PIN) {
+        splash.remove();
+      } else {
+        error.textContent = "Incorrect PIN. Please try again.";
+        input.value = "";
+        input.focus();
+      }
+      btn.disabled = false;
+      btn.textContent = "Enter";
+    }, 600);
   }
   btn.onclick = tryAccess;
   input.onkeydown = (e) => {

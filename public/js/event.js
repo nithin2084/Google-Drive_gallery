@@ -207,7 +207,16 @@ document.addEventListener("DOMContentLoaded", () => {
         a.setAttribute("data-src", `/api/imageproxy/${photo.id}?size=w1200`);
         a.setAttribute("data-sub-html", `<h4>${photo.name}</h4>`);
         a.className = "gallery-item";
-        a.innerHTML = `<img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">`;
+        a.innerHTML = `
+          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
+          <div class="img-overlay">
+            <span class="img-title">${photo.name}</span>
+            <span class="img-actions">
+              <a href="/api/imageproxy/${photo.id}?size=w1200" target="_blank" title="View Full" tabindex="-1"><i class="fas fa-search-plus"></i></a>
+              <a href="/api/imageproxy/${photo.id}?size=w1200" download title="Download" tabindex="-1"><i class="fas fa-download"></i></a>
+            </span>
+          </div>
+        `;
         galleryEl.appendChild(a);
       });
       // Initialize LightGallery
