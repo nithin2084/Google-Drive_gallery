@@ -481,5 +481,28 @@ app.post(
   }
 );
 
+// Rename and delete endpoints for admin actions
+app.post("/api/rename/:id", async (req, res) => {
+  try {
+    const { newName, adminKey } = req.body;
+    if (adminKey !== process.env.ADMIN_KEY) return res.status(403).json({ error: "Invalid admin key" });
+    await drive.files.update({ fileId: req.params.id, resource: { name: newName } });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: "Rename failed" });
+  }
+});
+
+app.post("/api/delete/:id", async (req, res) => {
+  try {
+    const { adminKey } = req.body;
+    if (adminKey !== process.env.ADMIN_KEY) return res.status(403).json({ error: "Invalid admin key" });
+    await drive.files.delete({ fileId: req.params.id });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

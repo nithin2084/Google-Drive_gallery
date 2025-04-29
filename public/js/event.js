@@ -23,6 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPage = 1;
   const IMAGES_PER_PAGE = 20;
 
+  // Add sort state
+  let sortBy = "date"; // or "name" or "type"
+  let sortOrder = "desc"; // or "asc"
+
   // Modal for image preview
   let photoModal = document.getElementById("photoModal");
   if (!photoModal) {
@@ -104,11 +108,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Add sort UI
+  const sortBar = document.createElement("div");
+  sortBar.className = "sort-bar";
+  sortBar.innerHTML = `
+    <label>Sort by: </label>
+    <select id="sortBySelect">
+      <option value="date">Date</option>
+      <option value="name">Name</option>
+      <option value="type">Type</option>
+    </select>
+    <select id="sortOrderSelect">
+      <option value="desc">Desc</option>
+      <option value="asc">Asc</option>
+    </select>
+  `;
+  breadcrumbEl.parentNode.insertBefore(sortBar, breadcrumbEl.nextSibling);
+  document.getElementById("sortBySelect").onchange = (e) => { sortBy = e.target.value; renderGallery(); };
+  document.getElementById("sortOrderSelect").onchange = (e) => { sortOrder = e.target.value; renderGallery(); };
+
+  // Sort items
+  function sortItems(arr) {
+    return arr.slice().sort((a, b) => {
+      let cmp = 0;
+      if (sortBy === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortBy === "date") cmp = (a.createdTime || "").localeCompare(b.createdTime || "");
+      else if (sortBy === "type") cmp = (a.type || "").localeCompare(b.type || "");
+      return sortOrder === "asc" ? cmp : -cmp;
+    });
+  }
+
   // Render folders and images
   function renderGallery() {
     galleryEl.innerHTML = "";
-    // Folders first
-    items.filter(i => i.type === "folder").forEach(folder => {
+    // Folders first, sorted
+    sortItems(items.filter(i => i.type === "folder")).forEach(folder => {
       const div = document.createElement("div");
       div.className = "photo-card folder-card";
       div.innerHTML = `<div class='folder-icon'>${folder.folderIcon}</div><div class='photo-actions'><strong>${folder.name}</strong></div>`;
@@ -120,8 +154,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       galleryEl.appendChild(div);
     });
-    // Images with pagination
-    const imageItems = items.filter(i => i.type === "image");
+    // Images with pagination, sorted
+    const imageItems = sortItems(items.filter(i => i.type === "image"));
     const totalPages = Math.ceil(imageItems.length / IMAGES_PER_PAGE);
     const startIdx = (currentPage - 1) * IMAGES_PER_PAGE;
     const pageImages = imageItems.slice(startIdx, startIdx + IMAGES_PER_PAGE);
