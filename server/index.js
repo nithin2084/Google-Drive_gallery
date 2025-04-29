@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const cors = require("cors");
 const archiver = require("archiver"); // Add this dependency for zip functionality
+const os = require("os"); // Add this near the top with other requires
 
 const app = express();
 const upload = multer({
@@ -485,8 +486,12 @@ app.post(
 app.post("/api/rename/:id", async (req, res) => {
   try {
     const { newName, adminKey } = req.body;
-    if (adminKey !== process.env.ADMIN_KEY) return res.status(403).json({ error: "Invalid admin key" });
-    await drive.files.update({ fileId: req.params.id, resource: { name: newName } });
+    if (adminKey !== process.env.ADMIN_KEY)
+      return res.status(403).json({ error: "Invalid admin key" });
+    await drive.files.update({
+      fileId: req.params.id,
+      resource: { name: newName },
+    });
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: "Rename failed" });
@@ -496,7 +501,8 @@ app.post("/api/rename/:id", async (req, res) => {
 app.post("/api/delete/:id", async (req, res) => {
   try {
     const { adminKey } = req.body;
-    if (adminKey !== process.env.ADMIN_KEY) return res.status(403).json({ error: "Invalid admin key" });
+    if (adminKey !== process.env.ADMIN_KEY)
+      return res.status(403).json({ error: "Invalid admin key" });
     await drive.files.delete({ fileId: req.params.id });
     res.json({ success: true });
   } catch (e) {
@@ -505,4 +511,33 @@ app.post("/api/delete/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Function to get local IP addresses
+function getLocalIPs() {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+
+  for (const interfaceName in interfaces) {
+    const interface = interfaces[interfaceName];
+    for (const addr of interface) {
+      // Skip internal and non-IPv4 addresses
+      if (addr.family === "IPv4" && !addr.internal) {
+        addresses.push(addr.address);
+      }
+    }
+  }
+  return addresses;
+}
+
+// Listen on all network interfaces (0.0.0.0)
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`\nServer running on port ${PORT}`);
+  console.log("\nYou can access the gallery from:");
+  console.log(`Local: http://localhost:${PORT}`);
+
+  const localIPs = getLocalIPs();
+  localIPs.forEach((ip) => {
+    console.log(`Network: http://${ip}:${PORT}`);
+  });
+  console.log("\n\n");
+});

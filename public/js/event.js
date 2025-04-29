@@ -194,13 +194,15 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       galleryEl.appendChild(div);
     });
+
     // Images with pagination, sorted
     const imageItems = sortItems(items.filter((i) => i.type === "image"));
     const totalPages = Math.ceil(imageItems.length / IMAGES_PER_PAGE);
     const startIdx = (currentPage - 1) * IMAGES_PER_PAGE;
     const pageImages = imageItems.slice(startIdx, startIdx + IMAGES_PER_PAGE);
+
     if (!selectMode) {
-      pageImages.forEach((photo, idx) => {
+      pageImages.forEach((photo) => {
         const a = document.createElement("a");
         a.href = `/api/imageproxy/${photo.id}?size=w1200`;
         a.setAttribute("data-lg-size", "1200-800");
@@ -219,7 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         galleryEl.appendChild(a);
       });
-      // Initialize LightGallery
+
       if (galleryInstance) {
         galleryInstance.destroy();
         galleryInstance = null;
@@ -234,32 +236,46 @@ document.addEventListener("DOMContentLoaded", () => {
         enableTouch: true,
       });
     } else {
-      pageImages.forEach((photo, idx) => {
+      pageImages.forEach((photo) => {
         const div = document.createElement("div");
-        div.className = "photo-card";
+        div.className = "gallery-item";
+        div.dataset.id = photo.id;
         div.innerHTML = `
           <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
-          <div class="photo-actions"></div>
+          <div class="img-overlay">
+            <span class="img-title">${photo.name}</span>
+          </div>
         `;
-        const actions = div.querySelector(".photo-actions");
+        
+        // Add click handler for selection
+        div.addEventListener('click', () => {
+          div.classList.toggle('selected');
+          const checkbox = div.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = div.classList.contains('selected');
+          }
+        });
+
+        // Add checkbox for selection
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.className = "photo-checkbox";
+        checkbox.className = "checkbox-container";
         checkbox.dataset.id = photo.id;
-        actions.appendChild(checkbox);
-        div.querySelector("img").onclick = (e) => {
-          e.preventDefault();
-          checkbox.checked = !checkbox.checked;
-        };
+        checkbox.addEventListener('change', (e) => {
+          div.classList.toggle('selected', e.target.checked);
+          e.stopPropagation();
+        });
+        div.appendChild(checkbox);
+        
         galleryEl.appendChild(div);
       });
-      // Destroy LightGallery if present
+
       if (galleryInstance) {
         galleryInstance.destroy();
         galleryInstance = null;
       }
     }
-    // Pagination controls
+
     renderPagination(totalPages);
     if (!galleryEl.innerHTML) {
       galleryEl.innerHTML = `<div class='empty-state'><i class='fas fa-images'></i><h3>No folders or images</h3></div>`;
@@ -371,15 +387,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Download selected
   downloadSelectedBtn.addEventListener("click", () => {
     const ids = Array.from(
-      document.querySelectorAll(".photo-checkbox:checked")
-    ).map((cb) => cb.dataset.id);
+      document.querySelectorAll(".gallery-item.selected")
+    ).map((el) => el.dataset.id);
+    
     if (!ids.length) {
       showNotification("Select at least one image.", "error");
       return;
     }
-    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(
-      ","
-    )}`;
+    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(",")}`;
   });
 
   // Download all
