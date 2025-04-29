@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadSelectedBtn = document.getElementById("download-selected");
   const downloadAllBtn = document.getElementById("download-all");
   const paginationEl = document.getElementById("pagination");
+  const backBtn = document.getElementById("backBtn");
   let selectMode = false;
   let currentFolderId = eventId;
   let folderStack = [{ id: eventId, name: "Event Root" }];
@@ -49,6 +50,37 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("click", (e) => {
     if (e.target === photoModal) photoModal.style.display = "none";
   });
+
+  // Admin panel toggle logic
+  const adminToggleBtn = document.getElementById("adminToggleEvent");
+  const adminPanel = document.getElementById("adminPanelEvent");
+  if (adminToggleBtn && adminPanel) {
+    adminToggleBtn.addEventListener("click", function () {
+      adminPanel.classList.toggle("active");
+    });
+  }
+
+  // Back button logic
+  if (backBtn) {
+    backBtn.addEventListener("click", () => window.history.back());
+  }
+
+  // Notification logic
+  function showNotification(message, type = "success") {
+    let notification = document.getElementById("notification");
+    if (!notification) {
+      notification = document.createElement("div");
+      notification.id = "notification";
+      notification.className = `notification ${type}`;
+      document.body.appendChild(notification);
+    }
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.style.display = "block";
+    setTimeout(() => {
+      notification.style.display = "none";
+    }, 3000);
+  }
 
   // Load event info
   async function loadEventInfo() {
@@ -259,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const folderName = newFolderNameInput.value.trim();
     const adminKey = adminKeyFolderInput.value.trim();
     if (!folderName || !adminKey) {
-      alert("Please provide a folder name and admin key.");
+      showNotification("Please provide a folder name and admin key.", "error");
       return;
     }
     try {
@@ -271,13 +303,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (data.success) {
         newFolderNameInput.value = "";
-        alert("Subfolder created.");
+        showNotification("Subfolder created.", "success");
         loadFolderContents(currentFolderId);
       } else {
-        alert(data.error || "Failed to create subfolder");
+        showNotification(data.error || "Failed to create subfolder", "error");
       }
     } catch (e) {
-      alert("Error creating subfolder");
+      showNotification("Error creating subfolder", "error");
     }
   });
 
@@ -287,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const files = uploadFilesInput.files;
     const adminKey = adminKeyFolderInput.value.trim();
     if (!files.length || !adminKey) {
-      alert("Select files and enter admin key.");
+      showNotification("Select files and enter admin key.", "error");
       return;
     }
     const formData = new FormData();
@@ -300,14 +332,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await res.json();
       if (data.success) {
-        alert("Images uploaded.");
+        showNotification("Images uploaded.", "success");
         uploadFilesInput.value = "";
         loadFolderContents(currentFolderId);
       } else {
-        alert(data.error || "Upload failed");
+        showNotification(data.error || "Upload failed", "error");
       }
     } catch (e) {
-      alert("Error uploading images");
+      showNotification("Error uploading images", "error");
     }
   });
 
@@ -323,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
   downloadSelectedBtn.addEventListener("click", () => {
     const ids = Array.from(document.querySelectorAll(".photo-checkbox:checked")).map(cb => cb.dataset.id);
     if (!ids.length) {
-      alert("Select at least one image.");
+      showNotification("Select at least one image.", "error");
       return;
     }
     window.location.href = `/api/events/${eventId}/download?ids=${ids.join(",")}`;

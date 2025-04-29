@@ -27,6 +27,7 @@
         <h1 id="event-name">Loading Event...</h1>
         <button id="backBtn" class="btn-primary" style="margin-right:12px;">Back</button>
         <a href="/" class="btn-primary home-link">Home</a>
+        <button id="adminToggleEvent" class="admin-btn" style="margin-left:12px;" aria-label="Toggle admin controls">Admin</button>
       </div>
 
       <!-- Breadcrumb navigation for folders -->
@@ -41,12 +42,12 @@
           <button id="download-all" class="download-btn">Download All</button>
         </div>
         <!-- Admin controls for subfolders and upload -->
-        <div class="admin-actions" style="margin-top:1rem;">
+        <div class="admin-actions" id="adminPanelEvent" style="margin-top:1rem;" aria-label="Admin controls">
           <input type="text" id="newFolderName" placeholder="New Folder Name" style="margin-right:8px;" />
           <input type="password" id="adminKeyFolder" placeholder="Admin Key" style="margin-right:8px;" />
-          <button id="createFolderBtn" class="btn-primary" style="margin-right:16px;">Create Subfolder</button>
-          <input type="file" id="uploadFilesInput" multiple style="display:none;" />
-          <button id="uploadFilesBtn" class="btn-primary">Upload Images</button>
+          <button id="createFolderBtn" class="btn-primary" style="margin-right:16px;" aria-label="Create subfolder">Create Subfolder</button>
+          <input type="file" id="uploadFilesInput" multiple style="display:none;" aria-label="Upload images" />
+          <button id="uploadFilesBtn" class="btn-primary" aria-label="Upload images">Upload Images</button>
         </div>
       </div>
 

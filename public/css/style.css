@@ -67,17 +67,12 @@ h2 {
   margin-bottom: 1rem;
 }
 
-.admin-panel {
-  background: #fff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 2rem 0 1.5rem 0;
+.admin-panel,
+#adminPanelEvent {
   display: none;
-  transition: all 0.3s;
-  border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.04);
 }
 .admin-panel.active,
-.admin-panel.show {
+#adminPanelEvent.active {
   display: block;
   animation: slideDown 0.3s ease-out;
 }
@@ -428,32 +423,93 @@ h2 {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(30, 34, 90, 0.97);
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2rem;
+  background: transparent;
+}
+.splash-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: url("../img/backgrounf-splash.jpg") repeat-x center center;
+  background-size: cover;
+  animation: bg-move 40s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes bg-move {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: -600px;
+  }
+}
+.splash-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 34, 90, 0.95) 0%,
+    rgba(30, 34, 90, 0.7) 10%,
+    rgba(30, 34, 90, 0.1) 50%,
+    rgba(30, 34, 90, 0.7) 90%,
+    rgba(30, 34, 90, 0.95) 100%
+  );
 }
 .splash-box {
-  background: #222b;
-  padding: 2.5rem 2rem 2rem 2rem;
-  border-radius: 16px;
+  position: relative;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 18px;
   box-shadow: 0 4px 32px rgba(67, 97, 238, 0.18);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 340px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 320px;
+  gap: 1.2rem;
+}
+.splash-logos {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+.splash-logos img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(67, 97, 238, 0.12));
+}
+.splash-box h2 {
+  font-size: 1.3rem;
+  color: #222;
+  margin-bottom: 0.7rem;
+}
+.splash-error {
+  color: #ff3333;
+  min-height: 1.2em;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 .splash-box input[type="password"] {
   padding: 12px 16px;
   border-radius: 8px;
-  border: none;
+  border: 1.5px solid #ddd;
   font-size: 1.1rem;
   margin-bottom: 1.2rem;
   width: 100%;
+  background: #f8f9fa;
 }
 .splash-box button {
   background: var(--primary);
@@ -465,12 +521,10 @@ h2 {
   font-weight: 500;
   cursor: pointer;
   margin-top: 0.5rem;
+  transition: background 0.2s;
 }
-.splash-error {
-  color: #ff3333;
-  margin-bottom: 0.7rem;
-  font-size: 1rem;
-  min-height: 1.2em;
+.splash-box button:hover {
+  background: var(--primary-dark);
 }
 
 /* Context Menu Styles */

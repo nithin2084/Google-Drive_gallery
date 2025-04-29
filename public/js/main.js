@@ -1,14 +1,21 @@
-(function sitePasswordSplash() {
-  const SITE_PASSWORD = "0000"; // Change this to your desired password
-  const STORAGE_KEY = "site_access_granted";
-  if (localStorage.getItem(STORAGE_KEY) === "true") return;
+(function siteSplashScreen() {
+  const SITE_PIN = "0000"; // Change this to your desired PIN
+  // const STORAGE_KEY = "site_access_granted";
+  // if (localStorage.getItem(STORAGE_KEY) === "true") return;
+  // Always show splash for testing
   const splash = document.createElement("div");
   splash.className = "splash-overlay";
   splash.innerHTML = `
+    <div class="splash-bg"></div>
+    <div class="splash-fade"></div>
     <div class="splash-box">
-      <h2>Enter Access Code</h2>
+      <div class="splash-logos">
+        <img src="/img/logo1.png" alt="Collega Logo" />
+        <img src="/img/F1-Logo.png" alt="Media Club Logo" />
+      </div>
+      <h2>Enter Access PIN</h2>
       <div class="splash-error" id="splashError"></div>
-      <input type="password" id="splashInput" placeholder="Access code" autofocus autocomplete="off" />
+      <input type="password" id="splashInput" placeholder="Access PIN" autofocus autocomplete="off" />
       <button id="splashBtn">Enter</button>
     </div>
   `;
@@ -17,11 +24,11 @@
   const btn = splash.querySelector("#splashBtn");
   const error = splash.querySelector("#splashError");
   function tryAccess() {
-    if (input.value === SITE_PASSWORD) {
-      localStorage.setItem(STORAGE_KEY, "true");
+    if (input.value === SITE_PIN) {
+      // localStorage.setItem(STORAGE_KEY, "true");
       splash.remove();
     } else {
-      error.textContent = "Incorrect code. Please try again.";
+      error.textContent = "Incorrect PIN. Please try again.";
       input.value = "";
       input.focus();
     }
