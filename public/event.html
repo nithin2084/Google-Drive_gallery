@@ -20,11 +20,8 @@
       </div>
 
       <div class="controls">
-        <div class="toggle-view">
-          <button id="select-all">Select All</button>
-          <button id="deselect-all">Deselect All</button>
-        </div>
         <div class="action-buttons">
+          <button id="select-more" class="btn-primary">Select more</button>
           <button id="download-selected" class="download-btn">
             Download Selected
           </button>
@@ -54,10 +51,10 @@
       const galleryEl = document.getElementById("gallery");
       const loadingEl = document.getElementById("loading");
       const eventNameEl = document.getElementById("event-name");
-      const selectAllBtn = document.getElementById("select-all");
-      const deselectAllBtn = document.getElementById("deselect-all");
+      const selectMoreBtn = document.getElementById("select-more");
       const downloadSelectedBtn = document.getElementById("download-selected");
       const downloadAllBtn = document.getElementById("download-all");
+      let selectMode = false;
 
       // Load event info
       async function loadEventInfo() {
@@ -138,7 +135,16 @@
             a.appendChild(folderLabel);
           }
 
-          galleryEl.appendChild(a);
+          // Remove any previous click listeners by cloning
+          const aClone = a.cloneNode(true);
+          if (selectMode) {
+            aClone.addEventListener("click", function(e) {
+              e.preventDefault();
+              const cb = aClone.querySelector(".photo-checkbox");
+              cb.checked = !cb.checked;
+            });
+          }
+          galleryEl.appendChild(aClone);
         });
       }
 
@@ -169,16 +175,19 @@
       function initLightGallery() {
         if (galleryInstance) {
           galleryInstance.destroy();
+          galleryInstance = null;
         }
-        galleryInstance = lightGallery(galleryEl, {
-          selector: 'a.gallery-item', // Use static DOM mode
-          plugins: [lgZoom, lgThumbnail],
-          speed: 500,
-          download: true,
-          counter: true,
-          enableDrag: true,
-          enableTouch: true,
-        });
+        if (!selectMode) {
+          galleryInstance = lightGallery(galleryEl, {
+            selector: 'a.gallery-item',
+            plugins: [lgZoom, lgThumbnail],
+            speed: 500,
+            download: true,
+            counter: true,
+            enableDrag: true,
+            enableTouch: true,
+          });
+        }
       }
 
       // Download selected photos
@@ -203,16 +212,15 @@
         window.location.href = downloadUrl;
       }
 
-      // Toggle all checkboxes
-      function toggleCheckboxes(checked) {
-        document.querySelectorAll(".photo-checkbox").forEach((cb) => {
-          cb.checked = checked;
-        });
-      }
-
       // Event listeners
-      selectAllBtn.addEventListener("click", () => toggleCheckboxes(true));
-      deselectAllBtn.addEventListener("click", () => toggleCheckboxes(false));
+      selectMoreBtn.addEventListener("click", function() {
+        selectMode = !selectMode;
+        selectMoreBtn.classList.toggle("active", selectMode);
+        selectMoreBtn.textContent = selectMode ? "Done selecting" : "Select more";
+        renderGallery();
+        renderPagination();
+        initLightGallery();
+      });
       downloadSelectedBtn.addEventListener("click", downloadSelected);
       downloadAllBtn.addEventListener("click", downloadAll);
 

@@ -273,7 +273,9 @@ h2 {
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 10;
+  z-index: 20; /* Increased z-index to ensure on top */
+  pointer-events: auto; /* Ensure checkbox is clickable */
+  transform: none !important;
 }
 .checkbox-container input[type="checkbox"] {
   width: 22px;
@@ -281,6 +283,13 @@ h2 {
   accent-color: var(--primary);
   border-radius: 6px;
   border: 1.5px solid #ddd;
+}
+.gallery-item a, .gallery-item {
+  /* Prevent anchor from blocking checkbox clicks */
+  position: relative;
+}
+.gallery-item *:not(.checkbox-container) {
+  pointer-events: none;
 }
 
 .folder-label {
