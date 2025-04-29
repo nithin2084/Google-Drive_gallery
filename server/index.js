@@ -377,5 +377,109 @@ app.get("/api/imageproxy/:id", async (req, res) => {
     res.status(404).send("Image not found or access denied");
   }
 });
+
+// --- NESTED FOLDER FUNCTIONALITY ---
+// Create a subfolder inside any folder (event or subfolder)
+app.post("/api/folders/:parentId/create", async (req, res) => {
+  try {
+    const { name, adminKey } = req.body;
+    if (adminKey !== process.env.ADMIN_KEY) {
+      return res.status(403).json({ error: "Invalid admin key" });
+    }
+    const folder = await drive.files.create({
+      resource: {
+        name,
+        mimeType: "application/vnd.google-apps.folder",
+        parents: [req.params.parentId],
+      },
+      fields: "id,name,createdTime",
+    });
+    res.json({
+      success: true,
+      folder: {
+        ...folder.data,
+        folderIcon: getFolderIcon(name),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create subfolder" });
+  }
+});
+
+// List contents (folders and images) of any folder
+app.get("/api/folders/:folderId/contents", async (req, res) => {
+  try {
+    const response = await drive.files.list({
+      q: `'${req.params.folderId}' in parents`,
+      fields: "files(id,name,mimeType,createdTime,appProperties)",
+      orderBy: "createdTime desc",
+    });
+    const items = await Promise.all(
+      response.data.files.map(async (item) => {
+        if (item.mimeType === "application/vnd.google-apps.folder") {
+          return {
+            ...item,
+            type: "folder",
+            folderIcon: getFolderIcon(item.name),
+          };
+        } else if (item.mimeType.includes("image/")) {
+          return {
+            ...item,
+            type: "image",
+            thumbnailUrl: `https://drive.google.com/thumbnail?id=${item.id}&sz=w400-h400`,
+            downloadUrl: `https://drive.google.com/uc?export=download&id=${item.id}`,
+          };
+        } else {
+          return null;
+        }
+      })
+    );
+    res.json(items.filter(Boolean));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to list folder contents" });
+  }
+});
+
+// Upload images to any folder (not just event root)
+app.post(
+  "/api/folders/:folderId/upload",
+  upload.array("photos", 50),
+  async (req, res) => {
+    try {
+      if (req.body.adminKey !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ error: "Invalid admin key" });
+      }
+      const uploadResults = await Promise.all(
+        req.files.map(async (file) => {
+          const result = await drive.files.create({
+            resource: {
+              name: file.originalname,
+              parents: [req.params.folderId],
+            },
+            media: {
+              mimeType: file.mimetype,
+              body: fs.createReadStream(file.path),
+            },
+            fields: "id,name,webContentLink,mimeType",
+          });
+          fs.unlinkSync(file.path);
+          return result.data;
+        })
+      );
+      res.json({
+        success: true,
+        files: uploadResults.map((file) => ({
+          ...file,
+          displayUrl: `https://drive.google.com/uc?export=view&id=${file.id}`,
+          thumbnailUrl: `https://drive.google.com/thumbnail?id=${file.id}&sz=w400`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${file.id}`,
+        })),
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Upload failed" });
+    }
+  }
+);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

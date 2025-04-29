@@ -28,6 +28,9 @@
         <a href="/" class="btn-primary home-link">Home</a>
       </div>
 
+      <!-- Breadcrumb navigation for folders -->
+      <nav id="breadcrumb" class="breadcrumb-nav"></nav>
+
       <div class="controls">
         <div class="action-buttons">
           <button id="select-more" class="btn-primary">Select more</button>
@@ -35,6 +38,14 @@
             Download Selected
           </button>
           <button id="download-all" class="download-btn">Download All</button>
+        </div>
+        <!-- Admin controls for subfolders and upload -->
+        <div class="admin-actions" style="margin-top:1rem;">
+          <input type="text" id="newFolderName" placeholder="New Folder Name" style="margin-right:8px;" />
+          <input type="password" id="adminKeyFolder" placeholder="Admin Key" style="margin-right:8px;" />
+          <button id="createFolderBtn" class="btn-primary" style="margin-right:16px;">Create Subfolder</button>
+          <input type="file" id="uploadFilesInput" multiple style="display:none;" />
+          <button id="uploadFilesBtn" class="btn-primary">Upload Images</button>
         </div>
       </div>
 
@@ -48,199 +59,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
 
-    <script>
-      // Get event ID from URL
-      const eventId = window.location.pathname.split("/").pop();
-      let photos = [];
-      let galleryInstance = null;
-      let currentPage = 1;
-      const pageSize = 20;
-
-      // DOM elements
-      const galleryEl = document.getElementById("gallery");
-      const loadingEl = document.getElementById("loading");
-      const eventNameEl = document.getElementById("event-name");
-      const selectMoreBtn = document.getElementById("select-more");
-      const downloadSelectedBtn = document.getElementById("download-selected");
-      const downloadAllBtn = document.getElementById("download-all");
-      let selectMode = false;
-
-      // Load event info
-      async function loadEventInfo() {
-        try {
-          const res = await fetch("/api/events");
-          const events = await res.json();
-          const event = events.find((e) => e.id === eventId);
-
-          if (event) {
-            eventNameEl.textContent = event.name;
-            document.title = `Photos - ${event.name}`;
-          }
-        } catch (error) {
-          console.error("Error loading event info:", error);
-        }
-      }
-
-      // Load photos
-      async function loadPhotos() {
-        loadingEl.style.display = "block";
-        galleryEl.innerHTML = "";
-        document.getElementById("pagination").innerHTML = "";
-
-        try {
-          const res = await fetch(`/api/events/${eventId}/photos`);
-          photos = await res.json();
-
-          if (photos.length === 0) {
-            loadingEl.textContent = "No photos found in this gallery.";
-            return;
-          }
-
-          renderGallery();
-          renderPagination();
-          initLightGallery();
-          loadingEl.style.display = "none";
-        } catch (error) {
-          console.error("Error loading photos:", error);
-          loadingEl.textContent =
-            "Error loading photos. Please try again later.";
-        }
-      }
-
-      // Render gallery items (LightGallery version)
-      function renderGallery() {
-        galleryEl.innerHTML = "";
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const pagePhotos = photos.slice(start, end);
-
-        pagePhotos.forEach((photo, index) => {
-          const a = document.createElement("a");
-          a.href = `/api/imageproxy/${photo.id}?size=w1200`;
-          a.setAttribute(
-            "data-lg-size",
-            `${photo.width || 1200}-${photo.height || 800}`
-          );
-          a.setAttribute("target", "_blank");
-          a.setAttribute("data-index", start + index);
-          a.className = "gallery-item";
-
-          const img = document.createElement("img");
-          img.src = `/api/imageproxy/${photo.id}?size=w400`;
-          img.alt = photo.name;
-          img.loading = "lazy";
-          a.appendChild(img);
-
-          const checkboxContainer = document.createElement("div");
-          checkboxContainer.className = "checkbox-container";
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "photo-checkbox";
-          checkbox.dataset.id = photo.id;
-          checkboxContainer.appendChild(checkbox);
-          a.appendChild(checkboxContainer);
-
-          if (photo.folderPath) {
-            const folderLabel = document.createElement("div");
-            folderLabel.className = "folder-label";
-            folderLabel.textContent = photo.folderPath;
-            a.appendChild(folderLabel);
-          }
-
-          // Remove any previous click listeners by cloning
-          const aClone = a.cloneNode(true);
-          if (selectMode) {
-            aClone.addEventListener("click", function (e) {
-              e.preventDefault();
-              const cb = aClone.querySelector(".photo-checkbox");
-              cb.checked = !cb.checked;
-            });
-          }
-          galleryEl.appendChild(aClone);
-        });
-      }
-
-      // Render pagination controls
-      function renderPagination() {
-        const paginationEl = document.getElementById("pagination");
-        paginationEl.innerHTML = "";
-        const totalPages = Math.ceil(photos.length / pageSize);
-
-        if (totalPages <= 1) return;
-
-        for (let i = 1; i <= totalPages; i++) {
-          const btn = document.createElement("button");
-          btn.textContent = i;
-          btn.className = "btn-primary" + (i === currentPage ? " active" : "");
-          btn.style.margin = "0 2px";
-          btn.onclick = () => {
-            currentPage = i;
-            renderGallery();
-            renderPagination();
-            initLightGallery();
-          };
-          paginationEl.appendChild(btn);
-        }
-      }
-
-      // LightGallery initialization (fixed for static DOM mode)
-      function initLightGallery() {
-        if (galleryInstance) {
-          galleryInstance.destroy();
-          galleryInstance = null;
-        }
-        if (!selectMode) {
-          galleryInstance = lightGallery(galleryEl, {
-            selector: "a.gallery-item",
-            plugins: [lgZoom, lgThumbnail],
-            speed: 500,
-            download: true,
-            counter: true,
-            enableDrag: true,
-            enableTouch: true,
-          });
-        }
-      }
-
-      // Download selected photos
-      function downloadSelected() {
-        const checkboxes = document.querySelectorAll(".photo-checkbox:checked");
-        const selectedIds = Array.from(checkboxes).map((cb) => cb.dataset.id);
-
-        if (selectedIds.length === 0) {
-          alert("Please select at least one photo to download.");
-          return;
-        }
-
-        const downloadUrl = `/api/events/${eventId}/download?ids=${selectedIds.join(
-          ","
-        )}`;
-        window.location.href = downloadUrl;
-      }
-
-      // Download all photos
-      function downloadAll() {
-        const downloadUrl = `/api/events/${eventId}/download`;
-        window.location.href = downloadUrl;
-      }
-
-      // Event listeners
-      selectMoreBtn.addEventListener("click", function () {
-        selectMode = !selectMode;
-        selectMoreBtn.classList.toggle("active", selectMode);
-        selectMoreBtn.textContent = selectMode
-          ? "Done selecting"
-          : "Select more";
-        renderGallery();
-        renderPagination();
-        initLightGallery();
-      });
-      downloadSelectedBtn.addEventListener("click", downloadSelected);
-      downloadAllBtn.addEventListener("click", downloadAll);
-
-      // Initialize
-      loadEventInfo();
-      loadPhotos();
-    </script>
+    <!-- Use external event.js for all gallery/folder logic -->
+    <script src="/js/event.js"></script>
   </body>
 </html>

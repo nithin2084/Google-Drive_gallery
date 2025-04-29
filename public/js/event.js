@@ -1,230 +1,306 @@
+// NESTED FOLDER FUNCTIONALITY
+// This script replaces the default photo-only logic with folder navigation, subfolder creation, and upload to any folder.
 document.addEventListener("DOMContentLoaded", () => {
   const eventId = window.location.pathname.split("/")[2];
-  const eventTitle = document.getElementById("eventTitle");
-  const photoGrid = document.getElementById("photoGrid");
-  const fileDropArea = document.getElementById("fileDropArea");
-  const fileInput = document.getElementById("fileInput");
-  const fileInfo = document.getElementById("fileInfo");
-  const uploadBtn = document.getElementById("uploadBtn");
-  const adminKey = document.getElementById("adminKey");
-  const uploadStatus = document.getElementById("uploadStatus");
-  const photoModal = document.getElementById("photoModal");
+  const eventNameEl = document.getElementById("event-name");
+  const galleryEl = document.getElementById("gallery");
+  const loadingEl = document.getElementById("loading");
+  const breadcrumbEl = document.getElementById("breadcrumb");
+  const newFolderNameInput = document.getElementById("newFolderName");
+  const adminKeyFolderInput = document.getElementById("adminKeyFolder");
+  const createFolderBtn = document.getElementById("createFolderBtn");
+  const uploadFilesInput = document.getElementById("uploadFilesInput");
+  const uploadFilesBtn = document.getElementById("uploadFilesBtn");
+  const selectMoreBtn = document.getElementById("select-more");
+  const downloadSelectedBtn = document.getElementById("download-selected");
+  const downloadAllBtn = document.getElementById("download-all");
+  const paginationEl = document.getElementById("pagination");
+  let selectMode = false;
+  let currentFolderId = eventId;
+  let folderStack = [{ id: eventId, name: "Event Root" }];
+  let items = [];
+  let galleryInstance = null;
+  let currentPage = 1;
+  const IMAGES_PER_PAGE = 20;
+
+  // Modal for image preview
+  let photoModal = document.getElementById("photoModal");
+  if (!photoModal) {
+    photoModal = document.createElement("div");
+    photoModal.id = "photoModal";
+    photoModal.className = "photo-modal modal";
+    photoModal.innerHTML = `
+      <div class="modal-content">
+        <span class="close-photo" style="position:absolute;top:10px;right:18px;font-size:2rem;cursor:pointer">&times;</span>
+        <img id="modalImage" src="" style="max-width:90vw;max-height:70vh;display:block;margin:0 auto;" />
+        <a id="downloadFull" class="btn-primary" href="#" download style="margin-top:18px;display:inline-block;">Download Full Image</a>
+      </div>
+    `;
+    document.body.appendChild(photoModal);
+  }
   const modalImage = document.getElementById("modalImage");
   const downloadFull = document.getElementById("downloadFull");
-  const closePhoto = document.querySelector(".close-photo");
-  const refreshBtn = document.getElementById("refreshBtn");
+  const closePhoto = photoModal.querySelector(".close-photo");
+  closePhoto.onclick = () => (photoModal.style.display = "none");
+  window.addEventListener("click", (e) => {
+    if (e.target === photoModal) photoModal.style.display = "none";
+  });
 
-  // Load event photos with cache busting
-  async function loadEventPhotos(bypassCache = false) {
+  // Load event info
+  async function loadEventInfo() {
     try {
-      photoGrid.innerHTML = `
-        <div class="loading-spinner">
-          <div class="spinner"></div>
-          <p>Loading photos...</p>
-        </div>
-      `;
-
-      // Add cache busting parameter if requested
-      const cacheBuster = bypassCache ? `&_t=${new Date().getTime()}` : "";
-      const response = await fetch(
-        `/api/events/${eventId}/photos${cacheBuster}`
-      );
-      const photos = await response.json();
-
-      if (photos.length === 0) {
-        photoGrid.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-images"></i>
-            <h3>No photos yet</h3>
-            <p>Upload photos using the admin panel</p>
-          </div>
-        `;
-        return;
+      const res = await fetch("/api/events");
+      const events = await res.json();
+      const event = events.find((e) => e.id === eventId);
+      if (event) {
+        eventNameEl.textContent = event.name;
+        document.title = `Photos - ${event.name}`;
+        folderStack[0].name = event.name;
       }
-
-      // Batch DOM update: build HTML string first
-      let html = "";
-      photos.forEach((photo, idx) => {
-        html += `
-        <div class="photo-card" data-photo-idx="${idx}">
-          <img src="/api/imageproxy/${photo.id}?size=w400" 
-               alt="${photo.name}" 
-               class="photo-img"
-               data-full="/api/imageproxy/${photo.id}?size=w1200"
-               data-download="${photo.downloadUrl || photo.webContentLink}"
-               data-name="${photo.name}"
-               loading="lazy"
-               onerror="this.onerror=null;this.src='';this.alt='${
-                 photo.name
-               }';">
-          <div class="photo-actions">
-            <a href="${photo.downloadUrl || photo.webContentLink}" 
-               class="download-btn" 
-               download="${photo.name}">
-              <i class="fas fa-download"></i> Download
-            </a>
-          </div>
-        </div>
-        `;
-      });
-      photoGrid.innerHTML = html;
-
-      // Add click event to photos (delegated for performance, using correct photo)
-      photoGrid.querySelectorAll(".photo-img").forEach((img, idx) => {
-        img.addEventListener("click", () => {
-          const photo = photos[idx];
-          modalImage.src = `/api/imageproxy/${photo.id}?size=w1200`;
-          downloadFull.href = photo.downloadUrl || photo.webContentLink;
-          downloadFull.download = photo.name;
-          photoModal.style.display = "flex";
-        });
-      });
     } catch (error) {
-      console.error("Error loading photos:", error);
-      photoGrid.innerHTML = `
-        <div class="error-state">
-          <i class="fas fa-exclamation-triangle"></i>
-          <h3>Failed to load photos</h3>
-          <p>Please try again later</p>
-        </div>
-      `;
+      console.error("Error loading event info:", error);
     }
   }
 
-  // Handle file selection
-  if (fileDropArea) {
-    fileDropArea.addEventListener("click", () => fileInput.click());
-
-    // Add drag and drop functionality
-    fileDropArea.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      fileDropArea.classList.add("drag-over");
-    });
-
-    fileDropArea.addEventListener("dragleave", () => {
-      fileDropArea.classList.remove("drag-over");
-    });
-
-    fileDropArea.addEventListener("drop", (e) => {
-      e.preventDefault();
-      fileDropArea.classList.remove("drag-over");
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        updateFileInfo();
-      }
-    });
-  }
-
-  if (fileInput) {
-    fileInput.addEventListener("change", updateFileInfo);
-  }
-
-  function updateFileInfo() {
-    if (fileInput.files.length > 0) {
-      fileInfo.innerHTML = `
-        <strong>Selected ${fileInput.files.length} file(s):</strong>
-        <ul class="file-list">
-          ${Array.from(fileInput.files)
-            .map(
-              (file) => `
-            <li>${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</li>
-          `
-            )
-            .join("")}
-        </ul>
-      `;
-    } else {
-      fileInfo.innerHTML = "";
+  // Load contents (folders and images) of the current folder
+  async function loadFolderContents(folderId) {
+    currentPage = 1;
+    loadingEl.style.display = "block";
+    galleryEl.innerHTML = "";
+    try {
+      const res = await fetch(`/api/folders/${folderId}/contents`);
+      items = await res.json();
+      renderBreadcrumb();
+      renderGallery();
+      loadingEl.style.display = "none";
+    } catch (error) {
+      console.error("Error loading folder contents:", error);
+      galleryEl.innerHTML = `<div class='error-state'><i class='fas fa-exclamation-triangle'></i><h3>Failed to load folder</h3></div>`;
+      loadingEl.style.display = "none";
     }
   }
 
-  // Upload photos
-  if (uploadBtn) {
-    uploadBtn.addEventListener("click", async () => {
-      if (!fileInput.files || fileInput.files.length === 0) {
-        showStatus("Please select at least one photo", "error");
-        return;
+  // Render breadcrumb navigation
+  function renderBreadcrumb() {
+    breadcrumbEl.innerHTML = "";
+    folderStack.forEach((folder, idx) => {
+      const span = document.createElement("span");
+      span.textContent = folder.name;
+      span.className = "breadcrumb-item";
+      if (idx < folderStack.length - 1) {
+        span.style.cursor = "pointer";
+        span.onclick = () => {
+          folderStack = folderStack.slice(0, idx + 1);
+          currentFolderId = folder.id;
+          loadFolderContents(currentFolderId);
+        };
       }
-
-      if (!adminKey.value) {
-        showStatus("Please enter admin key", "error");
-        return;
+      breadcrumbEl.appendChild(span);
+      if (idx < folderStack.length - 1) {
+        const sep = document.createElement("span");
+        sep.textContent = " / ";
+        breadcrumbEl.appendChild(sep);
       }
+    });
+  }
 
-      const formData = new FormData();
-      Array.from(fileInput.files).forEach((file) => {
-        formData.append("photos", file);
+  // Render folders and images
+  function renderGallery() {
+    galleryEl.innerHTML = "";
+    // Folders first
+    items.filter(i => i.type === "folder").forEach(folder => {
+      const div = document.createElement("div");
+      div.className = "photo-card folder-card";
+      div.innerHTML = `<div class='folder-icon'>${folder.folderIcon}</div><div class='photo-actions'><strong>${folder.name}</strong></div>`;
+      div.style.cursor = "pointer";
+      div.onclick = () => {
+        folderStack.push({ id: folder.id, name: folder.name });
+        currentFolderId = folder.id;
+        loadFolderContents(currentFolderId);
+      };
+      galleryEl.appendChild(div);
+    });
+    // Images with pagination
+    const imageItems = items.filter(i => i.type === "image");
+    const totalPages = Math.ceil(imageItems.length / IMAGES_PER_PAGE);
+    const startIdx = (currentPage - 1) * IMAGES_PER_PAGE;
+    const pageImages = imageItems.slice(startIdx, startIdx + IMAGES_PER_PAGE);
+    if (!selectMode) {
+      pageImages.forEach((photo, idx) => {
+        const a = document.createElement("a");
+        a.href = `/api/imageproxy/${photo.id}?size=w1200`;
+        a.setAttribute("data-lg-size", "1200-800");
+        a.setAttribute("data-src", `/api/imageproxy/${photo.id}?size=w1200`);
+        a.setAttribute("data-sub-html", `<h4>${photo.name}</h4>`);
+        a.className = "gallery-item";
+        a.innerHTML = `<img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">`;
+        galleryEl.appendChild(a);
       });
-      formData.append("adminKey", adminKey.value);
-
-      try {
-        showStatus("Uploading photos...", "info");
-        uploadBtn.disabled = true;
-
-        const response = await fetch(`/api/events/${eventId}/upload`, {
-          method: "POST",
-          body: formData,
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showStatus(
-            `${
-              result.uploaded || result.files.length
-            } photos uploaded successfully!`,
-            "success"
-          );
-          fileInput.value = "";
-          fileInfo.innerHTML = "";
-          loadEventPhotos(true); // Force reload without cache after upload
-        } else {
-          showStatus(result.error || "Upload failed", "error");
-        }
-      } catch (error) {
-        console.error("Upload error:", error);
-        showStatus("Network error. Please try again.", "error");
-      } finally {
-        uploadBtn.disabled = false;
+      // Initialize LightGallery
+      if (galleryInstance) {
+        galleryInstance.destroy();
+        galleryInstance = null;
       }
-    });
-  }
-
-  // Refresh button (force reload)
-  if (refreshBtn) {
-    refreshBtn.addEventListener("click", () => {
-      loadEventPhotos(true); // Force reload without cache
-    });
-  }
-
-  // Photo modal controls
-  if (closePhoto) {
-    closePhoto.addEventListener("click", () => {
-      photoModal.style.display = "none";
-    });
-
-    window.addEventListener("click", (e) => {
-      if (e.target === photoModal) {
-        photoModal.style.display = "none";
+      galleryInstance = lightGallery(galleryEl, {
+        selector: ".gallery-item",
+        plugins: [lgZoom, lgThumbnail],
+        speed: 500,
+        download: true,
+        counter: true,
+        enableDrag: true,
+        enableTouch: true,
+      });
+    } else {
+      pageImages.forEach((photo, idx) => {
+        const div = document.createElement("div");
+        div.className = "photo-card";
+        div.innerHTML = `
+          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
+          <div class="photo-actions"></div>
+        `;
+        const actions = div.querySelector(".photo-actions");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "photo-checkbox";
+        checkbox.dataset.id = photo.id;
+        actions.appendChild(checkbox);
+        div.querySelector("img").onclick = (e) => {
+          e.preventDefault();
+          checkbox.checked = !checkbox.checked;
+        };
+        galleryEl.appendChild(div);
+      });
+      // Destroy LightGallery if present
+      if (galleryInstance) {
+        galleryInstance.destroy();
+        galleryInstance = null;
       }
-    });
+    }
+    // Pagination controls
+    renderPagination(totalPages);
+    if (!galleryEl.innerHTML) {
+      galleryEl.innerHTML = `<div class='empty-state'><i class='fas fa-images'></i><h3>No folders or images</h3></div>`;
+    }
   }
 
-  // Show status message
-  function showStatus(message, type) {
-    uploadStatus.textContent = message;
-    uploadStatus.className = `upload-status status-${type}`;
-    uploadStatus.style.display = "block";
-    setTimeout(() => {
-      uploadStatus.textContent = "";
-      uploadStatus.className = "upload-status";
-      uploadStatus.style.display = "none";
-    }, 5000);
+  function renderPagination(totalPages) {
+    paginationEl.innerHTML = "";
+    if (totalPages <= 1) return;
+    const prevBtn = document.createElement("button");
+    prevBtn.textContent = "Prev";
+    prevBtn.className = "btn-primary";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderGallery();
+      }
+    };
+    paginationEl.appendChild(prevBtn);
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i;
+      btn.className = "btn-primary" + (i === currentPage ? " active" : "");
+      btn.onclick = () => {
+        currentPage = i;
+        renderGallery();
+      };
+      paginationEl.appendChild(btn);
+    }
+    const nextBtn = document.createElement("button");
+    nextBtn.textContent = "Next";
+    nextBtn.className = "btn-primary";
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderGallery();
+      }
+    };
+    paginationEl.appendChild(nextBtn);
   }
+
+  // Create subfolder
+  createFolderBtn.addEventListener("click", async () => {
+    const folderName = newFolderNameInput.value.trim();
+    const adminKey = adminKeyFolderInput.value.trim();
+    if (!folderName || !adminKey) {
+      alert("Please provide a folder name and admin key.");
+      return;
+    }
+    try {
+      const res = await fetch(`/api/folders/${currentFolderId}/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: folderName, adminKey })
+      });
+      const data = await res.json();
+      if (data.success) {
+        newFolderNameInput.value = "";
+        alert("Subfolder created.");
+        loadFolderContents(currentFolderId);
+      } else {
+        alert(data.error || "Failed to create subfolder");
+      }
+    } catch (e) {
+      alert("Error creating subfolder");
+    }
+  });
+
+  // Upload images
+  uploadFilesBtn.addEventListener("click", () => uploadFilesInput.click());
+  uploadFilesInput.addEventListener("change", async () => {
+    const files = uploadFilesInput.files;
+    const adminKey = adminKeyFolderInput.value.trim();
+    if (!files.length || !adminKey) {
+      alert("Select files and enter admin key.");
+      return;
+    }
+    const formData = new FormData();
+    Array.from(files).forEach(f => formData.append("photos", f));
+    formData.append("adminKey", adminKey);
+    try {
+      const res = await fetch(`/api/folders/${currentFolderId}/upload`, {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Images uploaded.");
+        uploadFilesInput.value = "";
+        loadFolderContents(currentFolderId);
+      } else {
+        alert(data.error || "Upload failed");
+      }
+    } catch (e) {
+      alert("Error uploading images");
+    }
+  });
+
+  // Select mode
+  selectMoreBtn.addEventListener("click", () => {
+    selectMode = !selectMode;
+    selectMoreBtn.classList.toggle("active", selectMode);
+    selectMoreBtn.textContent = selectMode ? "Done selecting" : "Select more";
+    renderGallery();
+  });
+
+  // Download selected
+  downloadSelectedBtn.addEventListener("click", () => {
+    const ids = Array.from(document.querySelectorAll(".photo-checkbox:checked")).map(cb => cb.dataset.id);
+    if (!ids.length) {
+      alert("Select at least one image.");
+      return;
+    }
+    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(",")}`;
+  });
+
+  // Download all
+  downloadAllBtn.addEventListener("click", () => {
+    window.location.href = `/api/events/${eventId}/download?recursive=true`;
+  });
 
   // Initial load
-  loadEventPhotos();
-
-  // Set up periodic refresh
-  setInterval(() => loadEventPhotos(true), 60000); // Refresh every minute
+  loadEventInfo();
+  loadFolderContents(currentFolderId);
 });
