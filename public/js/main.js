@@ -181,22 +181,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Notification functionality
     function showNotification(message, type = "success") {
-      const notification = document.getElementById("notification");
-      if (!notification) {
-        // Create notification element if it doesn't exist
-        const notif = document.createElement("div");
-        notif.id = "notification";
-        notif.className = `notification notification-${type}`;
-        document.body.appendChild(notif);
-      }
-
-      notification.textContent = message;
-      notification.className = `notification notification-${type}`;
-      notification.style.display = "block";
-
-      setTimeout(() => {
-        notification.style.display = "none";
-      }, 3000);
+      const notification = document.createElement("div");
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <div class="notification-icon">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        </div>
+        <div class="notification-message">${message}</div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      requestAnimationFrame(() => {
+        notification.classList.add('show');
+      });
+    
+      const hideNotification = () => {
+        notification.classList.remove('show');
+        notification.addEventListener('transitionend', () => {
+          notification.remove();
+        });
+      };
+    
+      // Add click to dismiss
+      notification.addEventListener('click', hideNotification);
+    
+      setTimeout(hideNotification, 3000);
     }
 
     // Global navigation functionality
@@ -213,18 +223,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // Scroll-to-top functionality
     function setupScrollToTop() {
       // Scroll-to-top functionality globally
-      const scrollToTopBtn = document.querySelector(".scroll-to-top");
+      const scrollToTopBtn = document.getElementById('scrollToTop');
       if (scrollToTopBtn) {
-        window.addEventListener("scroll", () => {
+        window.addEventListener('scroll', () => {
           if (window.scrollY > 300) {
-            scrollToTopBtn.classList.add("show");
+            scrollToTopBtn.classList.add('show');
           } else {
-            scrollToTopBtn.classList.remove("show");
+            scrollToTopBtn.classList.remove('show');
           }
         });
-
-        scrollToTopBtn.addEventListener("click", () => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+      
+        scrollToTopBtn.addEventListener('click', () => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
         });
       }
     }
@@ -305,22 +318,32 @@ if (dateFilter) {
 }
 
 function showNotification(message, type = "success") {
-  const notification = document.getElementById("notification");
-  if (!notification) {
-    // Create notification element if it doesn't exist
-    const notif = document.createElement("div");
-    notif.id = "notification";
-    notif.className = `notification notification-${type}`;
-    document.body.appendChild(notif);
-  }
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-icon">
+      <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+    </div>
+    <div class="notification-message">${message}</div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  requestAnimationFrame(() => {
+    notification.classList.add('show');
+  });
 
-  notification.textContent = message;
-  notification.className = `notification notification-${type}`;
-  notification.style.display = "block";
+  const hideNotification = () => {
+    notification.classList.remove('show');
+    notification.addEventListener('transitionend', () => {
+      notification.remove();
+    });
+  };
 
-  setTimeout(() => {
-    notification.style.display = "none";
-  }, 3000);
+  // Add click to dismiss
+  notification.addEventListener('click', hideNotification);
+
+  setTimeout(hideNotification, 3000);
 }
 
 function setupGlobalNav() {
@@ -335,18 +358,21 @@ function setupGlobalNav() {
 
 function setupScrollToTop() {
   // Scroll-to-top functionality globally
-  const scrollToTopBtn = document.querySelector(".scroll-to-top");
+  const scrollToTopBtn = document.getElementById('scrollToTop');
   if (scrollToTopBtn) {
-    window.addEventListener("scroll", function () {
+    window.addEventListener('scroll', function () {
       if (window.scrollY > 300) {
-        scrollToTopBtn.classList.add("show");
+        scrollToTopBtn.classList.add('show');
       } else {
-        scrollToTopBtn.classList.remove("show");
+        scrollToTopBtn.classList.remove('show');
       }
     });
-
-    scrollToTopBtn.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  
+    scrollToTopBtn.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
     });
   }
 }
