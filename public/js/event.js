@@ -156,16 +156,24 @@ document.addEventListener("DOMContentLoaded", () => {
     </select>
   `;
   breadcrumbEl.parentNode.insertBefore(sortBar, breadcrumbEl.nextSibling);
-  document.getElementById("sortBySelect").onchange = (e) => { sortBy = e.target.value; renderGallery(); };
-  document.getElementById("sortOrderSelect").onchange = (e) => { sortOrder = e.target.value; renderGallery(); };
+  document.getElementById("sortBySelect").onchange = (e) => {
+    sortBy = e.target.value;
+    renderGallery();
+  };
+  document.getElementById("sortOrderSelect").onchange = (e) => {
+    sortOrder = e.target.value;
+    renderGallery();
+  };
 
   // Sort items
   function sortItems(arr) {
     return arr.slice().sort((a, b) => {
       let cmp = 0;
       if (sortBy === "name") cmp = a.name.localeCompare(b.name);
-      else if (sortBy === "date") cmp = (a.createdTime || "").localeCompare(b.createdTime || "");
-      else if (sortBy === "type") cmp = (a.type || "").localeCompare(b.type || "");
+      else if (sortBy === "date")
+        cmp = (a.createdTime || "").localeCompare(b.createdTime || "");
+      else if (sortBy === "type")
+        cmp = (a.type || "").localeCompare(b.type || "");
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }
@@ -174,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderGallery() {
     galleryEl.innerHTML = "";
     // Folders first, sorted
-    sortItems(items.filter(i => i.type === "folder")).forEach(folder => {
+    sortItems(items.filter((i) => i.type === "folder")).forEach((folder) => {
       const div = document.createElement("div");
       div.className = "photo-card folder-card";
       div.innerHTML = `<div class='folder-icon'>${folder.folderIcon}</div><div class='photo-actions'><strong>${folder.name}</strong></div>`;
@@ -187,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       galleryEl.appendChild(div);
     });
     // Images with pagination, sorted
-    const imageItems = sortItems(items.filter(i => i.type === "image"));
+    const imageItems = sortItems(items.filter((i) => i.type === "image"));
     const totalPages = Math.ceil(imageItems.length / IMAGES_PER_PAGE);
     const startIdx = (currentPage - 1) * IMAGES_PER_PAGE;
     const pageImages = imageItems.slice(startIdx, startIdx + IMAGES_PER_PAGE);
@@ -298,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(`/api/folders/${currentFolderId}/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: folderName, adminKey })
+        body: JSON.stringify({ name: folderName, adminKey }),
       });
       const data = await res.json();
       if (data.success) {
@@ -323,12 +331,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const formData = new FormData();
-    Array.from(files).forEach(f => formData.append("photos", f));
+    Array.from(files).forEach((f) => formData.append("photos", f));
     formData.append("adminKey", adminKey);
     try {
       const res = await fetch(`/api/folders/${currentFolderId}/upload`, {
         method: "POST",
-        body: formData
+        body: formData,
       });
       const data = await res.json();
       if (data.success) {
@@ -353,12 +361,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Download selected
   downloadSelectedBtn.addEventListener("click", () => {
-    const ids = Array.from(document.querySelectorAll(".photo-checkbox:checked")).map(cb => cb.dataset.id);
+    const ids = Array.from(
+      document.querySelectorAll(".photo-checkbox:checked")
+    ).map((cb) => cb.dataset.id);
     if (!ids.length) {
       showNotification("Select at least one image.", "error");
       return;
     }
-    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(",")}`;
+    window.location.href = `/api/events/${eventId}/download?ids=${ids.join(
+      ","
+    )}`;
   });
 
   // Download all
