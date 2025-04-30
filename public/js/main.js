@@ -17,7 +17,6 @@
       <div class="splash-error" id="splashError" role="alert"></div>
       <div style="position:relative;width:100%;">
         <input type="password" id="splashInput" placeholder="Access PIN" autofocus autocomplete="off" aria-labelledby="splashTitle" aria-required="true" />
-        <button class="toggle-pin" id="togglePin" aria-label="Show or hide PIN" tabindex="0" type="button">👁️</button>
       </div>
       <button id="splashBtn" aria-label="Submit PIN">Enter</button>
     </div>
@@ -26,15 +25,7 @@
   const input = splash.querySelector("#splashInput");
   const btn = splash.querySelector("#splashBtn");
   const error = splash.querySelector("#splashError");
-  const togglePin = splash.querySelector("#togglePin");
-  // Show/hide PIN logic
-  togglePin.onclick = function () {
-    input.type = input.type === "password" ? "text" : "password";
-    togglePin.textContent = input.type === "password" ? "👁️" : "🙈";
-  };
-  togglePin.onkeydown = function (e) {
-    if (e.key === "Enter" || e.key === " ") togglePin.click();
-  };
+
   function tryAccess() {
     btn.disabled = true;
     btn.textContent = "Checking...";
