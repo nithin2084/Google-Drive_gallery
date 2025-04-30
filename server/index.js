@@ -27,7 +27,8 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Google Drive Setup
 const SCOPES = ["https://www.googleapis.com/auth/drive"];
-const credentials = require("./auth/credentials.json");
+// Load credentials from environment variable for Railway deployment
+const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT || fs.readFileSync(path.join(__dirname, "auth/credentials.json"), "utf8"));
 const auth = new google.auth.JWT(
   credentials.client_email,
   null,
