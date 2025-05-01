@@ -58,26 +58,13 @@ document.addEventListener("DOMContentLoaded", function () {
     refreshBtn.addEventListener("click", function () {
       loadEvents(true); // Force reload without cache
     });
+    // Force reload without cache
   }
 
   // Initialize event loading if on the events page
   const eventsGrid = document.getElementById("events-grid");
   if (eventsGrid) {
-    loadEvents(true); // Load with cache busting// Global functionalities
-    setupGlobalNav();
-    setupScrollToTop();
-
-    // Set up refresh button
-    const refreshBtn = document.getElementById("refresh-btn");
-    if (refreshBtn) {
-      refreshBtn.addEventListener("click", () => loadEvents(true)); // Force reload without cache
-    }
-
-    // Initialize event loading if on the events page
-    const eventsGrid = document.getElementById("events-grid");
-    if (eventsGrid) {
-      loadEvents(true); // Load with cache busting
-    }
+    loadEvents(true); // Load with cache busting
 
     // Periodic refresh for events
     setInterval(() => {
@@ -124,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <a href="/events/${event.id}">
               ${
                 event.coverId
-                  ? `<div class="event-cover" style="background-image: url('/api/imageproxy/${event.coverId}?size=w400${cacheBuster}')"></div>`
+                  ? `<div class="event-cover" style="background-image: url('https://drive.google.com/thumbnail?id=${event.coverId}&sz=w400-h400${cacheBuster}')"></div>`
                   : `<div class="folder-icon">${event.folderIcon}</div>`
               }
               <div class="event-info">
@@ -273,7 +260,7 @@ async function loadEvents(bypassCache = false) {
             <a href="/events/${event.id}">
               ${
                 event.coverId
-                  ? `<div class="event-cover" style="background-image: url('/api/imageproxy/${event.coverId}?size=w400${cacheBuster}')"></div>`
+                  ? `<div class="event-cover" style="background-image: url('https://drive.google.com/thumbnail?id=${event.coverId}&sz=w400-h400${cacheBuster}')"></div>`
                   : `<div class="folder-icon">${event.folderIcon}</div>`
               }
               <div class="event-info">

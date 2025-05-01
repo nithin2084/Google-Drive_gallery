@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
         a.setAttribute("data-sub-html", `<h4>${photo.name}</h4>`);
         a.className = "gallery-item";
         a.innerHTML = `
-          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
+          <img src="${photo.thumbnailUrl}" alt="${photo.name}" class="photo-img" loading="lazy">
           <div class="img-overlay">
             <span class="img-title">${photo.name}</span>
             <span class="img-actions">
