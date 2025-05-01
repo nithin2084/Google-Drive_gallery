@@ -1,5 +1,8 @@
 (function siteSplashScreen() {
   const SITE_PIN = "0000"; // Change this to your desired PIN
+  // const STORAGE_KEY = "site_access_granted";
+  // if (localStorage.getItem(STORAGE_KEY) === "true") return;
+  // Always show splash for testing
   const splash = document.createElement("div");
   splash.className = "splash-overlay";
   splash.innerHTML = `
@@ -60,7 +63,21 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize event loading if on the events page
   const eventsGrid = document.getElementById("events-grid");
   if (eventsGrid) {
-    loadEvents(true); // Load with cache busting
+    loadEvents(true); // Load with cache busting// Global functionalities
+    setupGlobalNav();
+    setupScrollToTop();
+
+    // Set up refresh button
+    const refreshBtn = document.getElementById("refresh-btn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => loadEvents(true)); // Force reload without cache
+    }
+
+    // Initialize event loading if on the events page
+    const eventsGrid = document.getElementById("events-grid");
+    if (eventsGrid) {
+      loadEvents(true); // Load with cache busting
+    }
 
     // Periodic refresh for events
     setInterval(() => {
