@@ -62,7 +62,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Back button logic
   if (backBtn) {
-    backBtn.addEventListener("click", () => window.history.back());
+    backBtn.addEventListener("click", () => {
+      if (folderStack.length > 1) {
+        folderStack.pop();
+        currentFolderId = folderStack[folderStack.length - 1].id;
+        loadFolderContents(currentFolderId);
+      } else {
+        // If at root, go to home
+        window.location.href = "/";
+      }
+    });
   }
 
   // Notification logic
@@ -103,6 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
     currentPage = 1;
     loadingEl.style.display = "block";
     galleryEl.innerHTML = "";
+    // Ensure folderStack is correct for direct navigation or refresh
+    if (folderStack[folderStack.length - 1].id !== folderId) {
+      // Only push if not already at top
+      folderStack.push({ id: folderId, name: "Subfolder" });
+    }
     try {
       const res = await fetch(`/api/folders/${folderId}/contents`);
       items = await res.json();
