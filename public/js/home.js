@@ -176,17 +176,15 @@ async function loadEvents(bypassCache = false) {
         day: "numeric",
       });
 
-      // Create event card HTML with cache buster for images
+      // Use thumbnail for event cover
       let imageHtml;
       if (event.coverId) {
         // Use our proxy endpoint for the thumbnail with cache buster
         const cacheBuster = bypassCache ? `&_t=${new Date().getTime()}` : "";
-        imageHtml = `<img src="/api/imageproxy/${event.coverId}?size=w400${cacheBuster}" alt="${event.name}" loading="lazy">`;
+        imageHtml = `<img src="/api/imageproxy/${event.coverId}?size=w400${cacheBuster}" alt="${event.name}" loading="lazy" class="event-cover">`;
       } else if (event.folderIcon) {
-        // Use the SVG icon if no cover image
         imageHtml = `<div class="event-placeholder">${event.folderIcon}</div>`;
       } else {
-        // Default placeholder
         imageHtml = `<div class="event-placeholder"><i class="fas fa-images"></i></div>`;
       }
 
