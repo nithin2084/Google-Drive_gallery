@@ -1,4 +1,4 @@
-(function siteSplashScreen() {
+/*(function siteSplashScreen() {
   const SITE_PIN = "0000"; // Change this to your desired PIN
   // const STORAGE_KEY = "site_access_granted";
   // if (localStorage.getItem(STORAGE_KEY) === "true") return;
@@ -10,8 +10,7 @@
     <div class="splash-fade"></div>
     <div class="splash-box" role="dialog" aria-modal="true" aria-label="Access PIN Dialog">
       <div class="splash-logos">
-        <img src="/img/logo1.png" alt="Collega Logo" />
-        <img src="/img/F1-Logo.png" alt="Media Club Logo" />
+        <img src="/img/falconsblack.png" alt="Media Club Logo" />
       </div>
       <h2 id="splashTitle">Enter Access PIN</h2>
       <div class="splash-error" id="splashError" role="alert"></div>
@@ -45,7 +44,7 @@
   input.onkeydown = (e) => {
     if (e.key === "Enter") tryAccess();
   };
-})();
+})();*/
 
 document.addEventListener("DOMContentLoaded", function () {
   // Global functionalities
@@ -111,8 +110,8 @@ document.addEventListener("DOMContentLoaded", function () {
             <a href="/events/${event.id}">
               ${
                 event.coverId
-                  ? `<div class="event-cover" style="background-image: url('https://drive.google.com/thumbnail?id=${event.coverId}&sz=w400-h400${cacheBuster}')"></div>`
-                  : `<div class="folder-icon">${event.folderIcon}</div>`
+                  ? `<div class="event-cover-container"><div class="event-cover" style="background-image: url('/api/imageproxy/${event.coverId}?size=w400${cacheBuster}')"></div></div>`
+                  : `<div class="event-cover-container"><div class="folder-icon">${event.folderIcon}</div></div>`
               }
               <div class="event-info">
                 <h3>${event.name}</h3>
@@ -260,8 +259,8 @@ async function loadEvents(bypassCache = false) {
             <a href="/events/${event.id}">
               ${
                 event.coverId
-                  ? `<div class="event-cover" style="background-image: url('https://drive.google.com/thumbnail?id=${event.coverId}&sz=w400-h400${cacheBuster}')"></div>`
-                  : `<div class="folder-icon">${event.folderIcon}</div>`
+                  ? `<div class="event-cover-container"><div class="event-cover" style="background-image: url('/api/imageproxy/${event.coverId}?size=w400${cacheBuster}')"></div></div>`
+                  : `<div class="event-cover-container"><div class="folder-icon">${event.folderIcon}</div></div>`
               }
               <div class="event-info">
                 <h3>${event.name}</h3>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About Us</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 2rem;
+      color: #222;
+    }
+
+    .highlight-section {
+      padding: 40px 20px;
+      background: #fff;
+      font-size: 18px;
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .highlight {
+      background-color: #dff0d8;
+      color: #222;
+    }
+
+    .team-section {
+      padding: 30px 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .section-title {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 1.8rem;
+      color: #444;
+      text-transform: uppercase;
+    }
+
+    .team-grid {
+      display: grid;
+      gap: 25px;
+      justify-items: center;
+    }
+
+    .team-grid.senior {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .team-grid.junior {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    @media (max-width: 768px) {
+      .team-grid.junior {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .team-grid.senior {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .team-grid.junior {
+        grid-template-columns: 1fr;
+      }
+      .team-grid.senior {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .member {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+      max-width: 250px;
+      transition: transform 0.3s ease;
+    }
+
+    .member:hover {
+      transform: translateY(-5px);
+    }
+
+    .member img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      height: 220px;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f5f5f5;
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .member img {
+        height: 180px;
+        max-height: 180px;
+        aspect-ratio: 1/1;
+      }
+    }
+
+    .member h3 {
+      margin: 15px 0 5px;
+      font-size: 1.1rem;
+    }
+
+    .member p {
+      margin: 0 0 10px;
+      color: #777;
+      font-size: 0.95rem;
+    }
+
+    .member a {
+      text-decoration: none;
+      color: #e4405f;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: #fbf8f8;
+      color: white;
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+
+    .navbar {
+  background-color: #212529; /* Dark background */
+  padding: 1rem;
+}
+
+/* Logo */
+.logo {
+  height: 40px;
+  margin-right: 1rem;
+}
+
+/* Navigation link */
+.nav-button {
+  position: relative;
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  padding-bottom: 4px;
+}
+
+/* Underline effect like P1 */
+.nav-button::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #ffffff;
+  transition: width 0.3s ease;
+}
+
+.nav-button:hover::after {
+  width: 100%;
+}
+
+/* Align items using flex (similar to P1 layout) */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .navbar-left {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .team-section {
+        padding: 20px 10px;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .highlight-section {
+        padding: 20px;
+        font-size: 16px;
+      }
+    }
+
+    /* Additional styles for better readability on mobile */
+    @media (max-width: 480px) {
+      body {
+        font-size: 14px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .team-section {
+        padding: 10px;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+      }
+
+      footer {
+        font-size: 0.8rem;
+        padding: 15px;
+      }
+    }
+    
+  </style>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- ✅ Bootstrap Icons CDN (for SVG icons like #bootstrap, #instagram, etc.) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar p-3 text-bg-dark">
+    <div class="navbar-left d-flex align-items-center justify-content-between w-100">
+      <img src="/img/falconswhite.png" alt="Falcons Logo" class="logo" />
+      <a href="index1.html" class="nav-button nav-link text-white">Back to events</a>
+    </div>
+  </nav>
+  
+
+<!-- About Section -->
+<section class="highlight-section" id="about">
+  <h2>"Capturing moments, one frame at a time, to tell stories that words cannot."</h2>
+</section>
+
+<!-- Senior Coordinators -->
+<section class="team-section">
+  <h2 class="section-title">Senior Coordinators</h2>
+  <div class="team-grid senior">
+    <div class="member">
+      <img src="/img/people/Krupanidhi.JPG" alt="Krupanidhi">
+      <h3>Krupanidhi M S</h3>
+      <p>Senior Coordinator</p>
+      <a href="https://www.instagram.com/krupanidhims/" target="_blank">@krupanidhims</a>
+    </div>
+    <div class="member">
+      <img src="/img/people/ananya.jpeg" alt="Ananya">
+      <h3>Ananya bhaskar</h3>
+      <p>Senior Coordinator</p>
+      <a href="https://instagram.com/ananya_836" target="_blank">@ananya_836</a>
+    </div>
+  </div>
+
+    <!-- Junior Coordinators -->
+    <h2 class="section-title">Junior Coordinators</h2>
+    <div class="team-grid junior">
+        <div class="member">
+            <img src="/img/people/kevin1.jpg" alt="Simon Kevin">
+            <h3>Simon Kevin </h3>
+            <p>Videographer</p>
+            <a href="https://instagram.com/kevitozz" target="_blank">@kevitozz</a>
+          </div>
+          <div class="member">
+            <img src="/img/people/nithin.PNG" alt="Nithin K Patil">
+            <h3>Nithin K Patil</h3>
+            <p>Web Developer</p>
+            <a href="https://instagram.com/nithin_ox" target="_blank">@nithin_ox</a>
+          </div>
+          <div class="member">
+            <img src="/img/people/sujay.jpeg" alt="Sujay Agarwal">
+            <h3>Sujay Agarwal</h3>
+            <p>Web Developer</p>
+            <a href="https://www.linkedin.com/in/sujay-agarwal28/" target="_blank">@sujay-agarwal28</a>
+          </div>
+      <div class="member">
+        <img src="/img/people/Shreyank.jpg" alt="Shreyank B ">
+        <h3>Shreyank B </h3>
+        <p>Videographer</p>
+        <a href="https://www.instagram.com/shreyank_b._" target="_blank">@shreyank_b._</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/mri.jpeg" alt="Mridhini Madhusudan">
+        <h3>Mridhini Madhusudan</h3>
+        <p>Editor</p>
+        <a href="https://www.instagram.com/mridhiniiii" target="_blank">@mridhiniiii</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/Rounak.jpg" alt="Rounak Kaveri ">
+        <h3>Rounak Kaveri</h3>
+        <p>Editor</p>
+        <a href="https://www.instagram.com/fram.enigma?igsh=ZzZmY2szdXZwZWI0" target="_blank">@fram.enigma</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/Ravi.JPG" alt="Ravitheja Kalkur">
+        <h3>Ravitheja Kalkur</h3>
+        <p>Drone Cinematographer</p>
+        <a href="https://www.instagram.com/kalkur_ravi_07?igsh=MTQ2eGtqcWk3bzV6cw%3D%3D" target="_blank">@kalkur_ravi_07</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/Pranaav.jpg" alt="Pranaav Aryaa">
+        <h3>Pranaav Aryaa</h3>
+        <p>Photographer</p>
+        <a href="https://www.instagram.com/itsaryaa_09?igsh=MXdqdzlxdTRxc2x6MQ%3D%3D" target="_blank">@itsaryaa_09</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/Michael.jpg" alt="Michael Jonathan A">
+        <h3>Michael Jonathan A</h3>
+        <p>Photographer</p>
+        <a href="https://www.instagram.com/michaellxye?igsh=MXE4cjdwazYycDM2" target="_blank">@michaellxye</a>
+      </div>
+      <div class="member">
+        <img src="/img/people/Nishan.jpg" alt="Nishan Kumar P ">
+        <h3>Nishan Kumar P </h3>
+        <p>Editor</p>
+        <a href="https://www.instagram.com/epithelialwitch" target="_blank">@epithelialwitch</a>
+      </div>
+        <div class="member">
+            <img src="/img/people/Likith.jpg" alt="Likith Tarakaram">
+            <h3>Likith Tarakaram</h3>
+            <p>Photographer</p>
+            <a href="https://www.instagram.com/likith_tarakaram?igsh=ZjBsaTlmMnA0dWp6" target="_blank">@likith_tarakaram</a>
+        </div>
+        <div class="member">
+            <img src="/img/people/utkarsh.jpg" alt="Utkarsh Maheshwari">
+            <h3>Utkarsh Maheshwari</h3>
+            <p>Editor</p>
+            <a href="https://www.instagram.com/utkarshgsuv" target="_blank">@utkarshgsuv</a>
+          </div>
+          <div class="member">
+            <img src="/img/people/Arvind.jpeg" alt="Arvind Bharadwaj">
+            <h3>Arvind Bharadwaj</h3>
+            <p>Photographer</p>
+            <a href="https://www.instagram.com/arvin.ndd" target="_blank">@arvin.ndd</a>
+          </div>
+          <div class="member">
+            <img src="/img/people/Manish.JPG" alt="Manish b s">
+            <h3>Manish B S</h3>
+            <p>Photographer</p>
+            <a href="https://www.instagram.com/_.manish_s" target="_blank">@_.manish_s</a>
+          </div>
+          <div class="member">
+            <img src="/img/people/Rijul.jpeg" alt="Rijul Singh">
+            <h3>Rijul Singh</h3>
+            <p>Photographer</p>
+            <a href="https://www.instagram.com/bokeh.bliss?igsh=N2tsZjhoYmlxb3Bi" target="_blank">@bokeh.bliss</a>
+          </div>
+          <div class="member">
+            <img src="img/people/rahul.png" alt="Rahul Datta">
+            <h3>Rahul Datta</h3>
+            <p>Editor</p>
+            <a href="https://www.instagram.com/cyanidemilkshakee/" target="_blank">@cyanidemilkshakee</a>
+          </div>
+          <div class="member">
+            <img src="img/people/praneeth.jpg" alt="praneeth R">
+            <h3>Praneeth R</h3>
+            <p>Photographer</p>
+            <a href="https://www.instagram.com/intoxicity_creation/" target="_blank">@intoxicity_creation</a>
+          </div>
+          <div class="member">
+            <img src="img/people/praful.jpg" alt="praneeth R">
+            <h3>Praful H N</h3>
+            <p>Editor</p>
+            <a href="https://www.instagram.com/pixelroooll/" target="_blank">@pixelroooll</a>
+          </div>
+         
+          
+      <!-- Add more members as needed -->
+    </div>
+  </section>
+
+  <!-- ✅ Footer Section with ion-icon logos -->
+<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <div class="col-md-4 d-flex align-items-center">
+        <a href="https://www.instagram.com/reel/DCCn515OXkr/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Home">
+            <img src="/img/falconsblack.png" alt="Company Logo" width="90" height="60">
+          </a>
+      <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Falcons, Bmsce</span>
+    </div>
+  
+    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+      <li class="ms-3"><a class="text-body-secondary" href="https://www.instagram.com/falcons.of.bmsce/" aria-label="Instagram">
+        <ion-icon name="logo-instagram" size="large"></ion-icon>
+      </a></li>
+      <li class="ms-3"><a class="text-body-secondary" href="https://www.linkedin.com/company/falcons-of-bmsce/?originalSubdomain=in" aria-label="Linkedin">
+        <ion-icon name="logo-linkedin" size="large"></ion-icon>
+      </a></li>
+    </ul>
+  </footer>
+  
+  
+  <script>
+    const section = document.getElementById('about');
+    window.addEventListener('scroll', () => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        section.classList.add('highlight');
+      } else {
+        section.classList.remove('highlight');
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  </body>
+  </html>

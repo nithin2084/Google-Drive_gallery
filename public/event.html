@@ -1,12 +1,154 @@
-<!-- event.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Event Photos</title>
+    <style>
+      body {
+        padding-top: 70px; /* Adjust if your navbar is taller */
+      }
 
-    <!-- LightGallery CSS (restored) -->
+      /* Custom styles for the footer */
+      .footer {
+        background-color: #343a40;
+        color: white;
+        padding: 20px 0;
+      }
+
+      .footer .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-links a {
+        color: white;
+        text-decoration: none;
+      }
+
+      /* Ensure gallery images scale properly */
+      #gallery img {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      /* Make gallery container responsive */
+      #gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Default to 3 images per row */
+        gap: 10px;
+        justify-items: center;
+      }
+
+      /* Responsive: Adjust grid for smaller screens */
+      @media (max-width: 992px) {
+        #gallery {
+          grid-template-columns: repeat(2, 1fr); /* 2 images per row on medium screens */
+        }
+      }
+
+      @media (max-width: 576px) {
+        #gallery {
+          grid-template-columns: 1fr; /* 1 image per row on smaller screens */
+        }
+      }
+
+      /* Make admin controls and action buttons responsive */
+      .admin-actions input,
+      .admin-actions button {
+        margin-bottom: 10px;
+        width: 100%;
+      }
+
+      @media (min-width: 768px) {
+        .admin-actions input,
+        .admin-actions button {
+          width: auto;
+        }
+      }
+
+      /* Navbar Styles */
+      .nav-link {
+        position: relative;
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        padding-bottom: 4px;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: #ffffff;
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* Footer adjustments */
+      footer {
+        padding-top: 30px;
+      }
+      #fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#fab:hover {
+  background-color: #0056b3;
+}
+
+      /* Responsive settings */
+      @media (max-width: 576px) {
+        #fab {
+          bottom: 15px;
+          right: 15px;
+        }
+
+        #customAlert {
+          right: 10px;
+          bottom: 80px;
+          font-size: 14px;
+          padding: 10px 16px;
+        }
+      }
+      
+      /* Responsive: Add margin below controls on small screens */
+      @media (max-width: 576px) {
+        .controls {
+          margin-bottom: 24px;
+        }
+        #gallery {
+          margin-top: 12px;
+        }
+      }
+    </style>
+    <!-- LightGallery CSS -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
@@ -20,100 +162,184 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
     />
     <link rel="stylesheet" href="/css/style.css" />
+    <!-- Add Bootstrap CSS for Navbar -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <div class="container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <img src="/img/falconswhite.png" alt="Logo" height="40" />
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a href="/aboutus.html" class="nav-link">Know the Team</a>
+            </li>
+            <li class="nav-item">
+              <a href="/index1.html" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item">
+              <a href="#" id="backBtn" class="nav-link">Back</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-3">
       <div class="event-header-bar">
         <h1 id="event-name">Loading Event...</h1>
-        <button id="backBtn" class="btn-primary" style="margin-right: 12px">
-          Back
-        </button>
-        <a href="/" class="btn-primary home-link">Home</a>
-        <button
-          id="adminToggleEvent"
-          class="admin-btn"
-          style="margin-left: 12px"
-          aria-label="Toggle admin controls"
-        >
-          Admin
-        </button>
       </div>
 
       <!-- Breadcrumb navigation for folders -->
       <nav id="breadcrumb" class="breadcrumb-nav"></nav>
 
-      <div class="controls">
-        <div class="action-buttons">
-          <button id="select-more" class="btn-primary">Select more</button>
-          <button id="download-selected" class="download-btn">
-            Download Selected
-          </button>
-          <button id="download-all" class="download-btn">Download All</button>
+      <div class="controls row gy-3">
+        <div class="col-12 col-md-6">
+          <div class="action-buttons d-flex gap-2 flex-row">
+            <button id="select-more" class="btn btn-black flex-fill">Select</button>
+            <button id="download-selected" class="btn btn-secondary w-100 d-none">Download Selected</button>
+          </div>
         </div>
-        <!-- Admin controls for subfolders and upload -->
-        <div
-          class="admin-actions"
-          id="adminPanelEvent"
-          style="margin-top: 1rem"
-          aria-label="Admin controls"
-        >
-          <input
-            type="text"
-            id="newFolderName"
-            placeholder="New Folder Name"
-            style="margin-right: 8px"
-          />
-          <input
-            type="password"
-            id="adminKeyFolder"
-            placeholder="Admin Key"
-            style="margin-right: 8px"
-          />
-          <button
-            id="createFolderBtn"
-            class="btn-primary"
-            style="margin-right: 16px"
-            aria-label="Create subfolder"
+        <div class="col-12 col-md-6">
+          <!-- Admin controls for subfolders and upload -->
+          <div
+            class="admin-actions"
+            id="adminPanelEvent"
+            style="margin-top: 1rem"
+            aria-label="Admin controls"
           >
-            Create Subfolder
-          </button>
-          <input
-            type="file"
-            id="uploadFilesInput"
-            multiple
-            style="display: none"
-            aria-label="Upload images"
-          />
-          <button
-            id="uploadFilesBtn"
-            class="btn-primary"
-            aria-label="Upload images"
-          >
-            Upload Images
-          </button>
+            <input
+              type="text"
+              id="newFolderName"
+              placeholder="New Folder Name"
+              class="form-control mb-2"
+            />
+            <input
+              type="password"
+              id="adminKeyFolder"
+              placeholder="Admin Key"
+              class="form-control mb-2"
+            />
+            <button
+              id="createFolderBtn"
+              class="btn btn-primary w-100"
+              aria-label="Create subfolder"
+            >
+              Create Subfolder
+            </button>
+            <input
+              type="file"
+              id="uploadFilesInput"
+              multiple
+              style="display: none"
+              aria-label="Upload images"
+            />
+            <button
+              id="uploadFilesBtn"
+              class="btn btn-secondary w-100"
+              aria-label="Upload images"
+            >
+              Upload Images
+            </button>
+          </div>
         </div>
       </div>
 
+      <!-- Gallery for event photos -->
       <div id="gallery" class="gallery"></div>
       <div id="pagination"></div>
       <div id="loading" class="loading">Loading images...</div>
     </div>
 
-    <footer class="footer">
-      <div class="container">
-        <div>© 2025 Sujay Agarwal</div>
-        <div class="footer-links">
-          <a href="/" class="btn-primary">Home</a>
+    <!-- Add this in your HTML somewhere, e.g., below the gallery -->
+    <div id="pagination-controls" class="d-flex justify-content-center flex-wrap gap-2 mt-4"></div>
+
+    <footer class="container-fluid border-top py-3 mt-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="d-flex align-items-center mb-3 mb-md-0">
+          <a href="https://www.instagram.com/reel/DCCn515OXkr/" class="me-3 text-decoration-none" aria-label="Home">
+            <img src="/img/falconsblack.png" alt="Company Logo" width="100" height="auto">
+          </a>
+          <span class="text-body-secondary">© 2025 Falcons, Bmsce</span>
+        </div>
+        <div class="d-flex gap-3">
+          <a class="text-body-secondary" href="https://www.instagram.com/falcons.of.bmsce/" aria-label="Instagram">
+            <ion-icon name="logo-instagram" size="large"></ion-icon>
+          </a>
+          <a class="text-body-secondary" href="https://www.linkedin.com/company/falcons-of-bmsce/" aria-label="Linkedin">
+            <ion-icon name="logo-linkedin" size="large"></ion-icon>
+          </a>
         </div>
       </div>
     </footer>
-
-    <!-- LightGallery JS (restored) -->
+    <button id="fab" title="Actions">
+      <ion-icon name="cloud-download-outline" size="large" style="color: white;"></ion-icon>
+    </button>
+    
+    <!-- Custom Alert Box -->
+    <div id="customAlert" style="position: fixed; right: 20px; bottom: 90px; background-color:  #008000; color: #fff; padding: 12px 20px; border-radius: 5px; z-index: 1050; display: none; opacity: 0; transition: opacity 0.3s;">
+      📥 Downloading selected images...
+    </div>
+    <!-- LightGallery JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
 
     <!-- Use external event.js for all gallery/folder logic -->
     <script src="/js/event.js"></script>
+
+    <!-- Bootstrap JS for dropdown functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script>
+      let holdTimer;
+      const fab = document.getElementById("fab");
+      const alertBox = document.getElementById("customAlert");
+    
+      function showCustomAlert(message = "📥 Downloading selected images...") {
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        alertBox.style.opacity = 1;
+    
+        setTimeout(() => {
+          alertBox.style.opacity = 0;
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 300);
+        }, 2000); // visible for 2 seconds
+      }
+      // Tap → Download Selected + alert
+      fab.addEventListener("click", () => {
+        showCustomAlert();
+        document.getElementById("download-selected").click();
+      });
+    
+      // Long Press → Enter Select Mode
+      fab.addEventListener("mousedown", () => {
+        holdTimer = setTimeout(() => {
+          document.getElementById("select-more").click();
+          showCustomAlert("🟢 Select mode activated!");
+        }, 700); // long press = 700ms
+      });
+    
+      fab.addEventListener("mouseup", () => {
+        clearTimeout(holdTimer);
+      });
+    
+      fab.addEventListener("mouseleave", () => {
+        clearTimeout(holdTimer);
+      });
+    </script>
+    
   </body>
 </html>

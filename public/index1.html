@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>falcons-of-bmsce</title>
+
+    <!-- Fonts & Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+
+    <!-- LightGallery CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lightgallery.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-zoom.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/css/lg-thumbnail.min.css"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <style>
+      .nav-link {
+        position: relative;
+        display: inline-block;
+        color: white;
+        text-decoration: none;
+        padding-bottom: 4px;
+      }
+
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: #ffffff;
+        transition: width 0.3s ease;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* Responsive event grid */
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+      }
+
+      .event-card {
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .event-card:hover {
+        transform: translateY(-4px);
+      }
+
+      .event-cover {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+
+      .event-info {
+        padding: 0.75rem;
+      }
+
+      .event-info h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ✅ Bootstrap Navbar -->
+    <header class="p-3 text-bg-dark">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+          <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+            <img src="/img/falconswhite.png" alt="Logo" height="40" class="me-2">
+          </a>
+
+          <ul class="nav">
+            <li class="nav-item">
+              <a href="#" id="refreshBtn" class="nav-link text-white">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="aboutus.html" class="nav-link text-white">
+                <i class="fas fa-info-circle"></i> Know the Team
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="container mt-4">
+      <div class="events-grid" id="eventsGrid">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading events...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="container-fluid border-top py-3 mt-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div class="d-flex align-items-center mb-3 mb-md-0">
+          <a href="https://www.instagram.com/reel/DCCn515OXkr/" class="me-3 text-decoration-none" aria-label="Home">
+            <img src="/img/falconsblack.png" alt="Company Logo" width="100" height="auto">
+          </a>
+          <span class="text-body-secondary">© 2025 Falcons, Bmsce</span>
+        </div>
+        <div class="d-flex gap-3">
+          <a class="text-body-secondary" href="https://www.instagram.com/falcons.of.bmsce/" aria-label="Instagram">
+            <ion-icon name="logo-instagram" size="large"></ion-icon>
+          </a>
+          <a class="text-body-secondary" href="https://www.linkedin.com/company/falcons-of-bmsce/" aria-label="Linkedin">
+            <ion-icon name="logo-linkedin" size="large"></ion-icon>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scroll to Top -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Scroll to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- LightGallery JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/lightgallery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/zoom/lg-zoom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/home.js"></script>
+    <script src="/js/main.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const refreshBtn = document.getElementById("refreshBtn");
+        if (refreshBtn) {
+          refreshBtn.addEventListener("click", function () {
+            loadEvents(true);
+          });
+        }
+
+        setInterval(() => {
+          loadEvents(true);
+        }, 30000);
+      });
+
+      function loadEvents(bypassCache = false) {
+        const eventsGrid = document.getElementById("eventsGrid");
+        eventsGrid.innerHTML = `
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading events...</p>
+          </div>
+        `;
+
+        const cacheBuster = bypassCache ? `?_t=${new Date().getTime()}` : "";
+
+        fetch(`/api/events${cacheBuster}`)
+          .then((response) => response.json())
+          .then((events) => {
+            if (events.length === 0) {
+              eventsGrid.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-calendar-xmark"></i>
+                  <h3>No events found</h3>
+                  <p>New events will appear here soon</p>
+                </div>
+              `;
+              return;
+            }
+
+            eventsGrid.innerHTML = events
+              .map(
+                (event) => `
+                <div class="event-card">
+                  <a href="/events/${event.id}" class="event-link">
+                    ${
+                      event.coverId
+                        ? `<div class="event-cover-container"><img src="/api/imageproxy/${event.coverId}?size=w400" alt="${event.name}" class="event-cover"></div>`
+                        : `<div class="event-cover-container"><div class="event-icon">${event.folderIcon || ""}</div></div>`
+                    }
+                    <div class="event-info">
+                      <h3>${event.name}</h3>
+                      <p>${new Date(event.createdTime).toLocaleDateString()}</p>
+                    </div>
+                  </a>
+                </div>
+              `
+              )
+              .join("");
+          })
+          .catch((error) => {
+            console.error("Error loading events:", error);
+            eventsGrid.innerHTML = `
+              <div class="error-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Failed to load events</h3>
+                <p>Please try again later</p>
+              </div>
+            `;
+          });
+      }
+
+      function showNotification(message, type = "success") {
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => notification.classList.add("show"), 100);
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+    </script>
+
+    <!-- Bootstrap JS & Ionicons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  </body>
+</html>
