@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadFilesBtn = document.getElementById("uploadFilesBtn");
   const selectMoreBtn = document.getElementById("select-more");
   const downloadSelectedBtn = document.getElementById("download-selected");
-  const downloadAllBtn = document.getElementById("download-all");
   const paginationEl = document.getElementById("pagination");
   const backBtn = document.getElementById("backBtn");
   let selectMode = false;
@@ -185,7 +184,16 @@ document.addEventListener("DOMContentLoaded", () => {
     sortItems(items.filter((i) => i.type === "folder")).forEach((folder) => {
       const div = document.createElement("div");
       div.className = "photo-card folder-card";
-      div.innerHTML = `<div class='folder-icon'>${folder.folderIcon}</div><div class='photo-actions'><strong>${folder.name}</strong></div>`;
+      div.innerHTML = `
+        <div class="folder-cover-container" style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 12px 0 0;">
+          ${
+            folder.coverId
+              ? `<img class='folder-cover-img' src='/api/imageproxy/${folder.coverId}?size=w400' alt='${folder.name}' style='width:100%;height:100%;object-fit:cover;'>`
+              : `<div class='folder-icon' style='width:100%;height:100%;display:flex;align-items:center;justify-content:center;'>${folder.folderIcon}</div>`
+          }
+        </div>
+        <div class='photo-actions'><strong>${folder.name}</strong></div>
+      `;
       div.style.cursor = "pointer";
       div.onclick = () => {
         folderStack.push({ id: folder.id, name: folder.name });
@@ -210,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         a.setAttribute("data-sub-html", `<h4>${photo.name}</h4>`);
         a.className = "gallery-item";
         a.innerHTML = `
-          <img src="${photo.thumbnailUrl}" alt="${photo.name}" class="photo-img" loading="lazy">
+          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
           <div class="img-overlay">
             <span class="img-title">${photo.name}</span>
             <span class="img-actions">
@@ -283,40 +291,51 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderPagination(totalPages) {
-    paginationEl.innerHTML = "";
-    if (totalPages <= 1) return;
-    const prevBtn = document.createElement("button");
-    prevBtn.textContent = "Prev";
-    prevBtn.className = "btn-primary";
+    const paginationContainer = document.getElementById('pagination-controls');
+    paginationContainer.innerHTML = ''; // Clear existing pagination buttons
+    paginationContainer.style.marginTop = '32px'; // Add spacing from gallery
+    paginationContainer.style.display = 'flex';
+    paginationContainer.style.justifyContent = 'center';
+    paginationContainer.style.flexWrap = 'wrap';
+    paginationContainer.style.gap = '10px';
+
+    // Previous Button
+    const prevBtn = document.createElement('button');
+    prevBtn.innerText = 'Previous';
+    prevBtn.className = 'btn btn-outline-secondary';
     prevBtn.disabled = currentPage === 1;
     prevBtn.onclick = () => {
-      if (currentPage > 1) {
-        currentPage--;
-        renderGallery();
-      }
+        if (currentPage > 1) {
+            currentPage--;
+            renderGallery();
+        }
     };
-    paginationEl.appendChild(prevBtn);
+    paginationContainer.appendChild(prevBtn);
+
+    // Page number buttons
     for (let i = 1; i <= totalPages; i++) {
-      const btn = document.createElement("button");
-      btn.textContent = i;
-      btn.className = "btn-primary" + (i === currentPage ? " active" : "");
-      btn.onclick = () => {
-        currentPage = i;
-        renderGallery();
-      };
-      paginationEl.appendChild(btn);
+        const pageBtn = document.createElement('button');
+        pageBtn.innerText = i;
+        pageBtn.className = `btn ${i === currentPage ? 'btn-primary' : 'btn-outline-primary'}`;
+        pageBtn.onclick = () => {
+            currentPage = i;
+            renderGallery();
+        };
+        paginationContainer.appendChild(pageBtn);
     }
-    const nextBtn = document.createElement("button");
-    nextBtn.textContent = "Next";
-    nextBtn.className = "btn-primary";
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.innerText = 'Next';
+    nextBtn.className = 'btn btn-outline-secondary';
     nextBtn.disabled = currentPage === totalPages;
     nextBtn.onclick = () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderGallery();
-      }
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderGallery();
+        }
     };
-    paginationEl.appendChild(nextBtn);
+    paginationContainer.appendChild(nextBtn);
   }
 
   // Create subfolder
@@ -397,11 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = `/api/events/${eventId}/download?ids=${ids.join(
       ","
     )}`;
-  });
-
-  // Download all
-  downloadAllBtn.addEventListener("click", () => {
-    window.location.href = `/api/events/${eventId}/download?recursive=true`;
   });
 
   // Initial load

@@ -1,0 +1,243 @@
+
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+
+
+.event-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+}
+
+
+
+.admin-panel,
+#adminPanelEvent {
+  display: none;
+}
+
+
+
+.admin-actions {
+  margin-top: 1.5rem;
+}
+
+
+
+.btn-primary,
+.refresh-btn,
+.admin-btn,
+.download-btn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.08);
+  position: relative;
+  overflow: hidden;
+  transform-origin: center;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+
+.admin-btn {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+}
+
+
+
+/* Enhanced Photo Grid Styles */
+.photo-grid,
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(67, 97, 238, 0.06);
+  transition: transform 0.3s ease;
+}
+
+
+  .container {
+    padding: 0 8px;
+  }
+
+
+  .event-header-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0.8rem;
+  }
+
+
+  .controls {
+    position: sticky;
+    top: 60px;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 90;
+  }
+
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+
+  .btn-primary,
+  .download-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+
+  .event-header-bar,
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+
+  .admin-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+
+  .btn-primary,
+  .download-btn {
+    width: auto;
+    min-width: 120px;
+    margin-bottom: 6px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+
+  .controls {
+    gap: 0;
+    padding: 8px 0;
+  }
+
+
+  .admin-actions {
+    padding: 8px;
+  }
+
+
+  .event-header-bar {
+    padding: 0.6rem;
+  }
+
+
+  .container {
+    padding: 0;
+  }
+
+
+
+  .footer {
+    padding: 1rem 0;
+  }
+
+
+
+/* Enhanced Breadcrumb Navigation */
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.06);
+}
+
+
+
+/* Footer Styles */
+.footer {
+  background: var(--dark);
+  color: white;
+  padding: 1.5rem 0;
+  margin-top: auto;
+}
+
+
+  .events-grid,
+  .photo-grid,
+  .gallery {
+    gap: 16px;
+  }
+
+
+  .events-grid,
+  .photo-grid,
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+
+  .container {
+    padding: 0 4px;
+  }
+
+
+  .events-grid,
+  .photo-grid,
+  .gallery {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+
+
+  .footer {
+    padding: 1rem 0;
+  }

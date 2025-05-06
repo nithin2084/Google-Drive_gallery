@@ -196,8 +196,7 @@ async function loadEvents(bypassCache = false) {
         </div>
         <div class="event-info">
           <h3>${event.name}</h3>
-          <div class="event-date">${formattedDate}</div>
-          <div class="event-actions">
+                    <div class="event-actions">
             <a href="/events/${event.id}" class="view-btn">
               <i class="fas fa-eye"></i> View Gallery
             </a>

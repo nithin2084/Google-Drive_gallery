@@ -347,35 +347,62 @@ app.get("/events/:id", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/event.html"));
 });
 
+// SVG placeholder for broken thumbnails
+const BROKEN_THUMB_SVG = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?><svg width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#e0e0e0"/><text x="50%" y="50%" text-anchor="middle" fill="#888" font-size="48" dy=".3em">🖼️</text></svg>`);
+
 app.get("/api/imageproxy/:id", async (req, res) => {
   try {
     const fileId = req.params.id;
     const size = req.query.size || "w400";
+    const isThumb = ["thumbnail", "w200", "w400", "w400-h400", "w300", "w300-h300"].includes(size);
 
     // Get the file metadata to verify it exists and is an image
     const fileInfo = await drive.files.get({
       fileId: fileId,
-      fields: "mimeType,name",
+      fields: "mimeType,name,thumbnailLink",
     });
-
     if (!fileInfo.data.mimeType.startsWith("image/")) {
       return res.status(400).send("Not an image file");
     }
 
-    // Get the actual file content
-    const response = await drive.files.get(
-      { fileId: fileId, alt: "media" },
-      { responseType: "stream" }
-    );
+    if (isThumb) {
+      // Proxy Google Drive thumbnail endpoint
+      const thumbUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`;
+      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+      const thumbRes = await fetch(thumbUrl);
+      if (thumbRes.ok) {
+        res.set("Content-Type", thumbRes.headers.get("content-type") || "image/jpeg");
+        res.set("Cache-Control", "public, max-age=86400");
+        return thumbRes.body.pipe(res);
+      } else {
+        res.set("Content-Type", "image/svg+xml");
+        res.set("Cache-Control", "public, max-age=86400");
+        return res.end(BROKEN_THUMB_SVG);
+      }
+    }
 
-    // Set appropriate headers
-    res.set("Content-Type", fileInfo.data.mimeType);
-    res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
+    // Only stream full image for w1200 or no size
+    if (size === "w1200" || !req.query.size) {
+      const response = await drive.files.get(
+        { fileId: fileId, alt: "media" },
+        { responseType: "stream" }
+      );
+      res.set("Content-Type", fileInfo.data.mimeType);
+      res.set("Cache-Control", "public, max-age=86400");
+      return response.data.pipe(res);
+    }
 
-    // Pipe the image data to response
-    response.data.pipe(res);
+    // For any other size, do not serve full image
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, max-age=86400");
+    return res.end(BROKEN_THUMB_SVG);
   } catch (error) {
-    console.error("Image proxy error:", error);
+    // On error, serve SVG placeholder for thumbs, else 404
+    if (["thumbnail", "w200", "w400", "w400-h400", "w300", "w300-h300"].includes(req.query.size)) {
+      res.set("Content-Type", "image/svg+xml");
+      res.set("Cache-Control", "public, max-age=86400");
+      return res.end(BROKEN_THUMB_SVG);
+    }
     res.status(404).send("Image not found or access denied");
   }
 });
@@ -419,10 +446,18 @@ app.get("/api/folders/:folderId/contents", async (req, res) => {
     const items = await Promise.all(
       response.data.files.map(async (item) => {
         if (item.mimeType === "application/vnd.google-apps.folder") {
+          // Check for images inside this folder for coverId
+          const images = await drive.files.list({
+            q: `'${item.id}' in parents and mimeType contains 'image/'`,
+            pageSize: 1,
+            fields: "files(id)",
+          });
+          const coverId = images.data.files[0]?.id || null;
           return {
             ...item,
             type: "folder",
-            folderIcon: getFolderIcon(item.name),
+            coverId,
+            folderIcon: coverId ? null : getFolderIcon(item.name),
           };
         } else if (item.mimeType.includes("image/")) {
           return {
