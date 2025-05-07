@@ -438,41 +438,58 @@ app.post("/api/folders/:parentId/create", async (req, res) => {
 // List contents (folders and images) of any folder
 app.get("/api/folders/:folderId/contents", async (req, res) => {
   try {
-    const response = await drive.files.list({
-      q: `'${req.params.folderId}' in parents`,
+    const pageToken = req.query.pageToken;
+    const pageSize = 100; // Google Drive API maximum page size
+
+    // First, get all folders (folders are usually fewer, so get them in one request)
+    const foldersResponse = await drive.files.list({
+      q: `'${req.params.folderId}' in parents and mimeType='application/vnd.google-apps.folder'`,
       fields: "files(id,name,mimeType,createdTime,appProperties)",
-      orderBy: "createdTime desc",
+      orderBy: "createdTime desc"
     });
-    const items = await Promise.all(
-      response.data.files.map(async (item) => {
-        if (item.mimeType === "application/vnd.google-apps.folder") {
-          // Check for images inside this folder for coverId
-          const images = await drive.files.list({
-            q: `'${item.id}' in parents and mimeType contains 'image/'`,
-            pageSize: 1,
-            fields: "files(id)",
-          });
-          const coverId = images.data.files[0]?.id || null;
-          return {
-            ...item,
-            type: "folder",
-            coverId,
-            folderIcon: coverId ? null : getFolderIcon(item.name),
-          };
-        } else if (item.mimeType.includes("image/")) {
-          return {
-            ...item,
-            type: "image",
-            thumbnailUrl: `https://drive.google.com/thumbnail?id=${item.id}&sz=w400-h400`,
-            downloadUrl: `https://drive.google.com/uc?export=download&id=${item.id}`,
-          };
-        } else {
-          return null;
-        }
+
+    // Then get images with pagination
+    const imagesResponse = await drive.files.list({
+      q: `'${req.params.folderId}' in parents and mimeType contains 'image/'`,
+      fields: "files(id,name,mimeType,createdTime,appProperties), nextPageToken",
+      orderBy: "createdTime desc",
+      pageSize: pageSize,
+      pageToken: pageToken
+    });
+
+    // Process folders
+    const folderItems = await Promise.all(
+      foldersResponse.data.files.map(async (item) => {
+        const images = await drive.files.list({
+          q: `'${item.id}' in parents and mimeType contains 'image/'`,
+          pageSize: 1,
+          fields: "files(id)"
+        });
+        const coverId = images.data.files[0]?.id || null;
+        return {
+          ...item,
+          type: "folder",
+          coverId,
+          folderIcon: coverId ? null : getFolderIcon(item.name)
+        };
       })
     );
-    res.json(items.filter(Boolean));
+
+    // Process images
+    const imageItems = imagesResponse.data.files.map(item => ({
+      ...item,
+      type: "image",
+      thumbnailUrl: `https://drive.google.com/thumbnail?id=${item.id}&sz=w400-h400`,
+      downloadUrl: `https://drive.google.com/uc?export=download&id=${item.id}`
+    }));
+
+    res.json({
+      items: [...folderItems, ...imageItems],
+      nextPageToken: imagesResponse.data.nextPageToken || null,
+      totalItems: folderItems.length + imageItems.length
+    });
   } catch (error) {
+    console.error("Failed to list folder contents:", error);
     res.status(500).json({ error: "Failed to list folder contents" });
   }
 });

@@ -21,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let items = [];
   let galleryInstance = null;
   let currentPage = 1;
-  const IMAGES_PER_PAGE = 20;
+  let nextPageToken = null;
+  const IMAGES_PER_PAGE = 30;
 
   // Add sort state
   let sortBy = "date"; // or "name" or "type"
@@ -98,13 +99,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Load contents (folders and images) of the current folder
-  async function loadFolderContents(folderId) {
-    currentPage = 1;
-    loadingEl.style.display = "block";
-    galleryEl.innerHTML = "";
+  async function loadFolderContents(folderId, pageToken = null) {
+    if (!pageToken) {
+      currentPage = 1;
+      items = [];
+      loadingEl.style.display = "block";
+      galleryEl.innerHTML = "";
+    }
+
     try {
-      const res = await fetch(`/api/folders/${folderId}/contents`);
-      items = await res.json();
+      const url = `/api/folders/${folderId}/contents${pageToken ? `?pageToken=${pageToken}` : ''}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (!pageToken) {
+        items = data.items;
+      } else {
+        // Append new images to existing items, preserving folders at the start
+        const folders = items.filter(i => i.type === 'folder');
+        const existingImages = items.filter(i => i.type === 'image');
+        items = [...folders, ...existingImages, ...data.items.filter(i => i.type === 'image')];
+      }
+      
+      nextPageToken = data.nextPageToken;
       renderBreadcrumb();
       renderGallery();
       loadingEl.style.display = "none";
@@ -288,12 +305,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!galleryEl.innerHTML) {
       galleryEl.innerHTML = `<div class='empty-state'><i class='fas fa-images'></i><h3>No folders or images</h3></div>`;
     }
+
+    // Add "Load More" button if there are more images
+    if (nextPageToken) {
+      const loadMoreBtn = document.createElement('button');
+      loadMoreBtn.innerText = 'Load More Images';
+      loadMoreBtn.className = 'btn btn-primary mt-4';
+      loadMoreBtn.onclick = () => {
+        loadFolderContents(currentFolderId, nextPageToken);
+      };
+      galleryEl.appendChild(loadMoreBtn);
+    }
   }
 
   function renderPagination(totalPages) {
     const paginationContainer = document.getElementById('pagination-controls');
-    paginationContainer.innerHTML = ''; // Clear existing pagination buttons
-    paginationContainer.style.marginTop = '32px'; // Add spacing from gallery
+    paginationContainer.innerHTML = '';
+    paginationContainer.style.marginTop = '32px';
     paginationContainer.style.display = 'flex';
     paginationContainer.style.justifyContent = 'center';
     paginationContainer.style.flexWrap = 'wrap';
@@ -312,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     paginationContainer.appendChild(prevBtn);
 
-    // Page number buttons
+    // Always show all page numbers without any limit
     for (let i = 1; i <= totalPages; i++) {
         const pageBtn = document.createElement('button');
         pageBtn.innerText = i;
