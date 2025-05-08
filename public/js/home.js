@@ -168,14 +168,6 @@ async function loadEvents(bypassCache = false) {
       const card = document.createElement("div");
       card.className = "event-card";
 
-      // Format date
-      const eventDate = new Date(event.createdTime);
-      const formattedDate = eventDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-
       // Create event card HTML with cache buster for images
       let imageHtml;
       if (event.coverId) {
@@ -196,7 +188,7 @@ async function loadEvents(bypassCache = false) {
         </div>
         <div class="event-info">
           <h3>${event.name}</h3>
-                    <div class="event-actions">
+          <div class="event-actions">
             <a href="/events/${event.id}" class="view-btn">
               <i class="fas fa-eye"></i> View Gallery
             </a>

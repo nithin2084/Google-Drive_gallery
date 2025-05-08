@@ -162,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
   sortBar.innerHTML = `
     <label>Sort by: </label>
     <select id="sortBySelect">
-      <option value="date">Date</option>
       <option value="name">Name</option>
       <option value="type">Type</option>
     </select>
@@ -186,10 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return arr.slice().sort((a, b) => {
       let cmp = 0;
       if (sortBy === "name") cmp = a.name.localeCompare(b.name);
-      else if (sortBy === "date")
-        cmp = (a.createdTime || "").localeCompare(b.createdTime || "");
-      else if (sortBy === "type")
-        cmp = (a.type || "").localeCompare(b.type || "");
+      else if (sortBy === "type") cmp = (a.type || "").localeCompare(b.type || "");
       return sortOrder === "asc" ? cmp : -cmp;
     });
   }
@@ -306,15 +302,18 @@ document.addEventListener("DOMContentLoaded", () => {
       galleryEl.innerHTML = `<div class='empty-state'><i class='fas fa-images'></i><h3>No folders or images</h3></div>`;
     }
 
-    // Add "Load More" button if there are more images
+    // Update Load More button placement
+    const loadMoreContainer = document.getElementById('load-more-container');
+    loadMoreContainer.innerHTML = ''; // Clear existing content
+    
     if (nextPageToken) {
       const loadMoreBtn = document.createElement('button');
       loadMoreBtn.innerText = 'Load More Images';
-      loadMoreBtn.className = 'btn btn-primary mt-4';
+      loadMoreBtn.className = 'btn btn-primary';
       loadMoreBtn.onclick = () => {
         loadFolderContents(currentFolderId, nextPageToken);
       };
-      galleryEl.appendChild(loadMoreBtn);
+      loadMoreContainer.appendChild(loadMoreBtn);
     }
   }
 
