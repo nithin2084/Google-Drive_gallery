@@ -193,6 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render folders and images
   function renderGallery() {
     galleryEl.innerHTML = "";
+    
     // Folders first, sorted
     sortItems(items.filter((i) => i.type === "folder")).forEach((folder) => {
       const div = document.createElement("div");
@@ -201,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="folder-cover-container" style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:12px 12px 0 0;">
           ${
             folder.coverId
-              ? `<img class='folder-cover-img' src='/api/imageproxy/${folder.coverId}?size=w400' alt='${folder.name}' style='width:100%;height:100%;object-fit:cover;'>`
+              ? `<img class='folder-cover-img' src='/api/imageproxy/${folder.coverId}?size=w400' alt='${folder.name}' style='width:100%;height:100%;object-fit:cover;' onerror="this.onerror=null; this.src='/img/falconsblack.png';">`
               : `<div class='folder-icon' style='width:100%;height:100%;display:flex;align-items:center;justify-content:center;'>${folder.folderIcon}</div>`
           }
         </div>
@@ -225,18 +226,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!selectMode) {
       pageImages.forEach((photo) => {
         const a = document.createElement("a");
-        a.href = `/api/imageproxy/${photo.id}?size=w1200`;
-        a.setAttribute("data-lg-size", "1200-800");
-        a.setAttribute("data-src", `/api/imageproxy/${photo.id}?size=w1200`);
+        a.href = `/api/imageproxy/${photo.id}`;
+        a.setAttribute("data-lg-size", "1600-1600");
+        a.setAttribute("data-src", `/api/imageproxy/${photo.id}`);
         a.setAttribute("data-sub-html", `<h4>${photo.name}</h4>`);
         a.className = "gallery-item";
         a.innerHTML = `
-          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
+          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy" onerror="this.onerror=null; this.src='/img/falconsblack.png';">
           <div class="img-overlay">
             <span class="img-title">${photo.name}</span>
             <span class="img-actions">
-              <a href="/api/imageproxy/${photo.id}?size=w1200" target="_blank" title="View Full" tabindex="-1"><i class="fas fa-search-plus"></i></a>
-              <a href="/api/imageproxy/${photo.id}?size=w1200" download title="Download" tabindex="-1"><i class="fas fa-download"></i></a>
+              <a href="/api/imageproxy/${photo.id}" target="_blank" title="View Full" tabindex="-1"><i class="fas fa-search-plus"></i></a>
+              <a href="/api/imageproxy/${photo.id}?download=true" download="${photo.name}" title="Download" tabindex="-1"><i class="fas fa-download"></i></a>
             </span>
           </div>
         `;
@@ -247,22 +248,25 @@ document.addEventListener("DOMContentLoaded", () => {
         galleryInstance.destroy();
         galleryInstance = null;
       }
-      galleryInstance = lightGallery(galleryEl, {
-        selector: ".gallery-item",
-        plugins: [lgZoom, lgThumbnail],
-        speed: 500,
-        download: true,
-        counter: true,
-        enableDrag: true,
-        enableTouch: true,
-      });
+
+      if (pageImages.length > 0) {
+        galleryInstance = lightGallery(galleryEl, {
+          selector: ".gallery-item",
+          plugins: [lgZoom, lgThumbnail],
+          speed: 500,
+          download: true,
+          counter: true,
+          enableDrag: true,
+          enableTouch: true
+        });
+      }
     } else {
       pageImages.forEach((photo) => {
         const div = document.createElement("div");
         div.className = "gallery-item";
         div.dataset.id = photo.id;
         div.innerHTML = `
-          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy">
+          <img src="/api/imageproxy/${photo.id}?size=w400" alt="${photo.name}" class="photo-img" loading="lazy" onerror="this.onerror=null; this.src='/img/falconsblack.png';">
           <div class="img-overlay">
             <span class="img-title">${photo.name}</span>
           </div>
@@ -290,11 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         galleryEl.appendChild(div);
       });
-
-      if (galleryInstance) {
-        galleryInstance.destroy();
-        galleryInstance = null;
-      }
     }
 
     renderPagination(totalPages);

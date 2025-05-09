@@ -353,57 +353,42 @@ const BROKEN_THUMB_SVG = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?><svg
 app.get("/api/imageproxy/:id", async (req, res) => {
   try {
     const fileId = req.params.id;
-    const size = req.query.size || "w400";
-    const isThumb = ["thumbnail", "w200", "w400", "w400-h400", "w300", "w300-h300"].includes(size);
+    const size = req.query.size;
+    const isDownload = req.query.download === 'true';
 
-    // Get the file metadata to verify it exists and is an image
+    // Get the file metadata
     const fileInfo = await drive.files.get({
       fileId: fileId,
-      fields: "mimeType,name,thumbnailLink",
+      fields: "mimeType,name",
     });
+
     if (!fileInfo.data.mimeType.startsWith("image/")) {
       return res.status(400).send("Not an image file");
     }
 
-    if (isThumb) {
-      // Proxy Google Drive thumbnail endpoint
-      const thumbUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`;
-      const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-      const thumbRes = await fetch(thumbUrl);
-      if (thumbRes.ok) {
-        res.set("Content-Type", thumbRes.headers.get("content-type") || "image/jpeg");
-        res.set("Cache-Control", "public, max-age=86400");
-        return thumbRes.body.pipe(res);
-      } else {
-        res.set("Content-Type", "image/svg+xml");
-        res.set("Cache-Control", "public, max-age=86400");
-        return res.end(BROKEN_THUMB_SVG);
-      }
-    }
+    // Get the image data stream
+    const response = await drive.files.get(
+      { fileId: fileId, alt: "media" },
+      { responseType: "stream" }
+    );
 
-    // Only stream full image for w1200 or no size
-    if (size === "w1200" || !req.query.size) {
-      const response = await drive.files.get(
-        { fileId: fileId, alt: "media" },
-        { responseType: "stream" }
-      );
-      res.set("Content-Type", fileInfo.data.mimeType);
-      res.set("Cache-Control", "public, max-age=86400");
-      return response.data.pipe(res);
+    // Set appropriate headers
+    res.set("Content-Type", fileInfo.data.mimeType);
+    if (isDownload) {
+      res.set("Content-Disposition", `attachment; filename="${fileInfo.data.name}"`);
+    } else {
+      res.set("Content-Disposition", "inline");
     }
+    res.set("Cache-Control", "public, max-age=86400"); // Cache for 24 hours
 
-    // For any other size, do not serve full image
-    res.set("Content-Type", "image/svg+xml");
-    res.set("Cache-Control", "public, max-age=86400");
-    return res.end(BROKEN_THUMB_SVG);
+    // Stream the image data
+    return response.data.pipe(res);
   } catch (error) {
-    // On error, serve SVG placeholder for thumbs, else 404
-    if (["thumbnail", "w200", "w400", "w400-h400", "w300", "w300-h300"].includes(req.query.size)) {
-      res.set("Content-Type", "image/svg+xml");
-      res.set("Cache-Control", "public, max-age=86400");
-      return res.end(BROKEN_THUMB_SVG);
-    }
-    res.status(404).send("Image not found or access denied");
+    console.error("Image proxy error:", error);
+    // Return a placeholder SVG for failed images
+    res.set("Content-Type", "image/svg+xml");
+    res.set("Cache-Control", "public, max-age=3600");
+    return res.end(BROKEN_THUMB_SVG);
   }
 });
 
@@ -441,7 +426,7 @@ app.get("/api/folders/:folderId/contents", async (req, res) => {
     const pageToken = req.query.pageToken;
     const pageSize = 100; // Google Drive API maximum page size
 
-    // First, get all folders (folders are usually fewer, so get them in one request)
+    // First, get all folders
     const foldersResponse = await drive.files.list({
       q: `'${req.params.folderId}' in parents and mimeType='application/vnd.google-apps.folder'`,
       fields: "files(id,name,mimeType,createdTime,appProperties)",
@@ -479,8 +464,8 @@ app.get("/api/folders/:folderId/contents", async (req, res) => {
     const imageItems = imagesResponse.data.files.map(item => ({
       ...item,
       type: "image",
-      thumbnailUrl: `https://drive.google.com/thumbnail?id=${item.id}&sz=w400-h400`,
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${item.id}`
+      id: item.id,
+      name: item.name
     }));
 
     res.json({
